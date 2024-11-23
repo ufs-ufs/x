@@ -17,10 +17,6 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        .hidden {
-            display: none;
-        }
-
         /* Simple Modal Styling */
         .modal-overlay {
             position: fixed;
@@ -79,25 +75,80 @@
 
         /* Content Styling */
         .content {
-            max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6 hidden
+            max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6 hidden;
+            display: flex;
         }
 
-        .content h1 {
-            text-2xl font-bold mb-4;
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0;
+            padding-right: 2rem;
+            border-right: 1px solid #e5e7eb;
         }
 
-        .content p {
+        .sidebar h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
             margin-bottom: 1rem;
         }
 
-        .content ul {
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #3B82F6;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .sidebar a:hover {
+            color: #2563EB;
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            flex-grow: 1;
+            padding-left: 2rem;
+        }
+
+        .main-content h1 {
+            text-3xl font-bold mb-6;
+        }
+
+        .main-content h2 {
+            text-2xl font-semibold mt-6 mb-3;
+        }
+
+        .main-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .main-content ul {
             list-style-type: disc;
             padding-left: 1.5rem;
             margin-bottom: 1rem;
         }
 
-        .content li {
+        .main-content li {
             margin-bottom: 0.5rem;
+        }
+
+        .code-snippet {
+            background-color: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 1rem;
         }
 
         /* Back Button */
@@ -115,6 +166,26 @@
         .back-button:hover {
             background-color: #2563EB;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+                padding-right: 0;
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .main-content {
+                padding-left: 0;
+            }
+        }
     </style>
 </head>
 
@@ -131,33 +202,118 @@
 
     <!-- Tutorial Content -->
     <div id="tutorialContent" class="content">
-        <h1>Tutorial Pentesting Menggunakan Dorking</h1>
-        <p>Selamat datang di tutorial pentesting lengkap menggunakan dorking. Teknik ini berguna untuk menemukan informasi sensitif yang tersembunyi di internet. Berikut adalah langkah-langkah yang dapat Anda ikuti:</p>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>Daftar Isi</h2>
+            <ul>
+                <li><a href="#pengantar">Pengantar</a></li>
+                <li><a href="#apa-itu-dorking">Apa Itu Dorking</a></li>
+                <li><a href="#menentukan-target">Menentukan Target</a></li>
+                <li><a href="#menggunakan-query">Menggunakan Query Spesifik</a></li>
+                <li><a href="#analisis-hasil">Analisis Hasil Pencarian</a></li>
+                <li><a href="#tools-tambahan">Tools Tambahan</a></li>
+                <li><a href="#best-practices">Best Practices</a></li>
+                <li><a href="#dokumentasi">Dokumentasi & Pelaporan</a></li>
+                <li><a href="#quiz">Quiz</a></li>
+            </ul>
+        </aside>
 
-        <h2>1. Pahami Apa Itu Dorking</h2>
-        <p>Dorking adalah teknik pencarian yang memanfaatkan query spesifik untuk menemukan informasi tersembunyi atau rentan di internet. Dengan menggunakan dorking, Anda dapat menemukan dokumen, basis data, skrip, dan berbagai file lain yang mungkin tidak seharusnya diakses secara publik.</p>
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 id="pengantar">Tutorial Pentesting Menggunakan Dorking</h1>
+            <p>Selamat datang di tutorial pentesting lengkap menggunakan dorking. Teknik ini berguna untuk menemukan informasi sensitif yang tersembunyi di internet. Berikut adalah langkah-langkah yang dapat Anda ikuti untuk memahami dan mengimplementasikan dorking dalam proses pentesting.</p>
 
-        <h2>2. Menentukan Target</h2>
-        <p>Sebelum memulai, tentukan target yang ingin Anda analisis. Misalnya, Anda mungkin ingin menemukan dokumen rahasia di situs web tertentu atau menemukan skrip yang rentan.</p>
+            <section id="apa-itu-dorking">
+                <h2>Apa Itu Dorking</h2>
+                <p>Dorking adalah teknik pencarian yang memanfaatkan query spesifik pada mesin pencari seperti Google untuk menemukan informasi tersembunyi atau rentan di internet. Dengan menggunakan dorking, Anda dapat menemukan dokumen, basis data, skrip, dan berbagai file lain yang mungkin tidak seharusnya diakses secara publik.</p>
+                <div class="code-snippet">
+<pre><code>intitle:"index of" "confidential" filetype:pdf</code></pre>
+                </div>
+                <p>Contoh di atas adalah query dorking untuk menemukan dokumen PDF yang berjudul "confidential".</p>
+            </section>
 
-        <h2>3. Menggunakan Mesin Pencari dengan Query Spesifik</h2>
-        <p>Gunakan mesin pencari seperti Google, Bing, atau DuckDuckGo dengan query yang telah disesuaikan. Berikut adalah beberapa contoh query dorking:</p>
-        <ul>
-            <li><strong>Dokumen Rahasia:</strong> <code>intitle:"index of" "confidential" filetype:pdf</code></li>
-            <li><strong>Skrip PHP Rentan:</strong> <code>filetype:php inurl:config</code></li>
-            <li><strong>Database Backup:</strong> <code>filetype:sql "backup"</code></li>
-        </ul>
+            <section id="menentukan-target">
+                <h2>Menentukan Target</h2>
+                <p>Sebelum memulai, tentukan target yang ingin Anda analisis. Misalnya, Anda mungkin ingin menemukan dokumen rahasia di situs web tertentu atau menemukan skrip yang rentan. Berikut adalah beberapa langkah untuk menentukan target:</p>
+                <ul>
+                    <li>Pilih domain atau situs web yang ingin dianalisis.</li>
+                    <li>Identifikasi jenis informasi yang ingin Anda temukan.</li>
+                    <li>Pastikan Anda memiliki izin untuk melakukan pentesting pada target tersebut.</li>
+                </ul>
+            </section>
 
-        <h2>4. Analisis Hasil Pencarian</h2>
-        <p>Setelah mendapatkan hasil pencarian, analisis setiap temuan untuk menentukan apakah informasi tersebut dapat dieksploitasi. Pastikan untuk selalu mematuhi hukum dan etika dalam setiap langkah.</p>
+            <section id="menggunakan-query">
+                <h2>Menggunakan Mesin Pencari dengan Query Spesifik</h2>
+                <p>Gunakan mesin pencari seperti Google, Bing, atau DuckDuckGo dengan query yang telah disesuaikan. Berikut adalah beberapa contoh query dorking yang umum digunakan:</p>
+                <ul>
+                    <li><strong>Dokumen Rahasia:</strong> <code>intitle:"index of" "confidential" filetype:pdf</code></li>
+                    <li><strong>Skrip PHP Rentan:</strong> <code>filetype:php inurl:config</code></li>
+                    <li><strong>Database Backup:</strong> <code>filetype:sql "backup"</code></li>
+                    <li><strong>Login Portal:</strong> <code>inurl:login.php</code></li>
+                    <li><strong>Direktori Terbuka:</strong> <code>intitle:"index of" "/admin"</code></li>
+                </ul>
+            </section>
 
-        <h2>5. Menggunakan Tools Tambahan</h2>
-        <p>Gunakan tools tambahan seperti Google Dorks Browser Extension atau aplikasi lain yang dapat membantu dalam proses pencarian dan analisis.</p>
+            <section id="analisis-hasil">
+                <h2>Analisis Hasil Pencarian</h2>
+                <p>Setelah mendapatkan hasil pencarian, analisis setiap temuan untuk menentukan apakah informasi tersebut dapat dieksploitasi. Berikut adalah langkah-langkah analisis:</p>
+                <ul>
+                    <li>Periksa validitas dan relevansi hasil pencarian.</li>
+                    <li>Identifikasi potensi kerentanan atau informasi sensitif.</li>
+                    <li>Evaluasi risiko dan dampak dari setiap temuan.</li>
+                </ul>
+                <p>Pastikan untuk selalu mematuhi hukum dan etika dalam setiap langkah.</p>
+            </section>
 
-        <h2>6. Dokumentasi dan Pelaporan</h2>
-        <p>Catat setiap temuan dan buat laporan yang jelas dan terperinci. Laporan ini akan berguna untuk memperbaiki kerentanan yang ditemukan.</p>
+            <section id="tools-tambahan">
+                <h2>Tools Tambahan</h2>
+                <p>Untuk mempermudah proses pencarian dan analisis, Anda dapat menggunakan berbagai tools tambahan berikut:</p>
+                <ul>
+                    <li><strong>Google Dorks Browser Extension:</strong> Memungkinkan Anda menjalankan query dorking langsung dari browser.</li>
+                    <li><strong>Maltego:</strong> Alat analisis link yang dapat membantu mengidentifikasi hubungan antara berbagai entitas.</li>
+                    <li><strong>Shodan:</strong> Mesin pencari khusus untuk perangkat yang terhubung ke internet.</li>
+                    <li><strong>SpiderFoot:</strong> Alat otomasi untuk pengumpulan intelijen dan analisis keamanan.</li>
+                </ul>
+            </section>
 
-        <a href="index.html" class="back-button">🔙 Kembali ke Beranda</a>
+            <section id="best-practices">
+                <h2>Best Practices</h2>
+                <p>Untuk memastikan efektivitas dan keamanan dalam menggunakan dorking, ikuti best practices berikut:</p>
+                <ul>
+                    <li>Selalu dapatkan izin sebelum melakukan pentesting.</li>
+                    <li>Jaga kerahasiaan informasi yang ditemukan.</li>
+                    <li>Gunakan teknik ini hanya untuk tujuan etis dan legal.</li>
+                    <li>Perbarui pengetahuan Anda tentang teknik terbaru dalam dorking dan pentesting.</li>
+                </ul>
+            </section>
+
+            <section id="dokumentasi">
+                <h2>Dokumentasi dan Pelaporan</h2>
+                <p>Catat setiap temuan dan buat laporan yang jelas dan terperinci. Berikut adalah langkah-langkah dalam dokumentasi:</p>
+                <ul>
+                    <li>Deskripsikan setiap temuan secara detail.</li>
+                    <li>Gambarkan potensi dampak dari setiap kerentanan.</li>
+                    <li>Sertakan rekomendasi untuk memperbaiki kerentanan yang ditemukan.</li>
+                    <li>Gunakan format laporan yang mudah dipahami oleh semua pihak terkait.</li>
+                </ul>
+                <p>Laporan ini akan berguna untuk memperbaiki kerentanan yang ditemukan dan meningkatkan keamanan sistem.</p>
+            </section>
+
+            <section id="quiz">
+                <h2>Quiz</h2>
+                <p>Uji pemahaman Anda tentang dorking dengan menjawab pertanyaan berikut:</p>
+                <ol class="list-decimal list-inside">
+                    <li>Apa itu dorking dan untuk apa digunakan?</li>
+                    <li>Sebutkan tiga contoh query dorking beserta fungsinya.</li>
+                    <li>Bagaimana cara menentukan target sebelum melakukan dorking?</li>
+                    <li>Sebutkan dua tools tambahan yang dapat digunakan bersama dorking.</li>
+                    <li>Jelaskan mengapa penting untuk selalu mematuhi etika dan hukum dalam pentesting.</li>
+                </ol>
+                <p>Silakan tulis jawaban Anda dan evaluasi pemahaman Anda tentang materi ini.</p>
+            </section>
+
+            <a href="index.html" class="back-button">🔙 Kembali ke Beranda</a>
+        </main>
     </div>
 
     <script>
