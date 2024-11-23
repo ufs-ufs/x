@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Pentesting Menggunakan Dorking</title>
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f3f4f6;
+            color: #1F2937;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Simple Modal Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 1rem;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+        }
+
+        .modal-content button {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .modal-content button:hover {
+            background-color: #2563EB;
+        }
+
+        .error-message {
+            color: red;
+            margin-bottom: 1rem;
+        }
+
+        /* Content Styling */
+        .content {
+            max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6 hidden
+        }
+
+        .content h1 {
+            text-2xl font-bold mb-4;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+        }
+
+        .content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Back Button */
+        .back-button {
+            margin-top: 2rem;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #3B82F6;
+            color: white;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #2563EB;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Password Modal -->
+    <div id="passwordModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Masukkan Password</h2>
+            <div id="errorMessage" class="error-message hidden">Password salah. Coba lagi.</div>
+            <input type="password" id="passwordInput" placeholder="Password...">
+            <button id="submitPassword">Masuk</button>
+        </div>
+    </div>
+
+    <!-- Tutorial Content -->
+    <div id="tutorialContent" class="content">
+        <h1>Tutorial Pentesting Menggunakan Dorking</h1>
+        <p>Selamat datang di tutorial pentesting lengkap menggunakan dorking. Teknik ini berguna untuk menemukan informasi sensitif yang tersembunyi di internet. Berikut adalah langkah-langkah yang dapat Anda ikuti:</p>
+
+        <h2>1. Pahami Apa Itu Dorking</h2>
+        <p>Dorking adalah teknik pencarian yang memanfaatkan query spesifik untuk menemukan informasi tersembunyi atau rentan di internet. Dengan menggunakan dorking, Anda dapat menemukan dokumen, basis data, skrip, dan berbagai file lain yang mungkin tidak seharusnya diakses secara publik.</p>
+
+        <h2>2. Menentukan Target</h2>
+        <p>Sebelum memulai, tentukan target yang ingin Anda analisis. Misalnya, Anda mungkin ingin menemukan dokumen rahasia di situs web tertentu atau menemukan skrip yang rentan.</p>
+
+        <h2>3. Menggunakan Mesin Pencari dengan Query Spesifik</h2>
+        <p>Gunakan mesin pencari seperti Google, Bing, atau DuckDuckGo dengan query yang telah disesuaikan. Berikut adalah beberapa contoh query dorking:</p>
+        <ul>
+            <li><strong>Dokumen Rahasia:</strong> <code>intitle:"index of" "confidential" filetype:pdf</code></li>
+            <li><strong>Skrip PHP Rentan:</strong> <code>filetype:php inurl:config</code></li>
+            <li><strong>Database Backup:</strong> <code>filetype:sql "backup"</code></li>
+        </ul>
+
+        <h2>4. Analisis Hasil Pencarian</h2>
+        <p>Setelah mendapatkan hasil pencarian, analisis setiap temuan untuk menentukan apakah informasi tersebut dapat dieksploitasi. Pastikan untuk selalu mematuhi hukum dan etika dalam setiap langkah.</p>
+
+        <h2>5. Menggunakan Tools Tambahan</h2>
+        <p>Gunakan tools tambahan seperti Google Dorks Browser Extension atau aplikasi lain yang dapat membantu dalam proses pencarian dan analisis.</p>
+
+        <h2>6. Dokumentasi dan Pelaporan</h2>
+        <p>Catat setiap temuan dan buat laporan yang jelas dan terperinci. Laporan ini akan berguna untuk memperbaiki kerentanan yang ditemukan.</p>
+
+        <a href="index.html" class="back-button">🔙 Kembali ke Beranda</a>
+    </div>
+
+    <script>
+        // Password Protection
+        const passwordModal = document.getElementById('passwordModal');
+        const submitPassword = document.getElementById('submitPassword');
+        const passwordInput = document.getElementById('passwordInput');
+        const errorMessage = document.getElementById('errorMessage');
+        const tutorialContent = document.getElementById('tutorialContent');
+
+        submitPassword.addEventListener('click', () => {
+            const enteredPassword = passwordInput.value;
+            if (enteredPassword === 'rahasiaku') {
+                // Sembunyikan modal dan tampilkan konten
+                passwordModal.classList.add('hidden');
+                tutorialContent.classList.remove('hidden');
+            } else {
+                // Tampilkan pesan error
+                errorMessage.classList.remove('hidden');
+            }
+        });
+
+        // Menutup pesan error saat pengguna mulai mengetik ulang
+        passwordInput.addEventListener('input', () => {
+            if (!errorMessage.classList.contains('hidden')) {
+                errorMessage.classList.add('hidden');
+            }
+        });
+
+        // Menghapus nilai input saat halaman dimuat ulang
+        window.onload = function () {
+            passwordInput.value = '';
+            errorMessage.classList.add('hidden');
+            tutorialContent.classList.add('hidden');
+            passwordModal.classList.remove('hidden');
+        };
+    </script>
+</body>
+
+</html>
