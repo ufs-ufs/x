@@ -214,7 +214,7 @@
 <body class="p-5" data-theme="dark">
     <div class="max-w-lg mx-auto bg-card-bg p-6 rounded-lg shadow-lg transition-colors">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-primary-color text-center">UFS DORKING</h1>
+            <h1 class="text-3xl font-bold text-primary-color text-center">UFS DORKING!</h1>
             <!-- Theme Toggle -->
             <div class="flex items-center">
                 <span class="mr-2">🌙</span>
@@ -234,9 +234,9 @@
                     placeholder="Masukkan kata kunci..." required>
             </div>
 
-            <!-- Pilihan Negara -->
+            <!-- Negara (Parameter yang mempengaruhi hasil pencarian) -->
             <div>
-                <label for="country" class="block text-text-color">Negara:</label>
+                <label for="country" class="block text-text-color">Negara: (Parameter yang mempengaruhi hasil pencarian)</label>
                 <select id="country" name="country"
                     class="border border-border-color p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-primary-color bg-input-bg text-text-color transition-colors"
                     required>
@@ -323,53 +323,43 @@
             <p class="text-gray-400 text-center">Menghasilkan pencarian...</p>
         </div>
         <div class="disclaimer text-sm text-gray-400 mt-4 text-center">
-            * Aplikasi ini dibuat untuk tujuan edukasi. Harap digunakan dengan bijak sesuai kebijakan yang berlaku.
-        </div>
+* Aplikasi ini dibuat untuk tujuan edukasi. Harap digunakan dengan bijak dan sesuai dengan kebijakan yang berlaku. Segala bentuk tindakan kriminal yang dilakukan menggunakan aplikasi ini sepenuhnya menjadi tanggung jawab pengguna, dan saya (UFS) tidak bertanggung jawab atas hal tersebut.        </div>
 
         <!-- Link ke Halaman Tutorial Pentesting -->
         <div class="mt-4 text-center">
-            <a href="tutorial.html" class="text-primary-color underline">🔒 Akses Tutorial Pentesting</a>
+            <a href="tutorial.html" class="text-primary-color underline">🔒 Akses T.Pentesting</a>
         </div>
 
-        <!-- FAQ Section -->
-        <h2 class="text-xl font-bold mt-4 cursor-pointer faq-header text-text-color flex items-center justify-between"
-            onclick="toggleFAQ()">
-            FAQ
-            <svg id="faqIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-300"
-                viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.584l3.71-4.353a.75.75 0 111.14.976l-4.25 5a.75.75 0 01-1.14 0l-4.25-5a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd" />
-            </svg>
-        </h2>
-        <div class="faq-content mt-2">
-            <div class="mb-4">
-                <h3 class="font-semibold text-text-color">1. Apa itu Dorking?</h3>
-                <p class="text-gray-400">Dorking adalah teknik pencarian menggunakan query spesifik untuk menemukan informasi
-                    tersembunyi di internet.</p>
-            </div>
-            <div class="mb-4">
-                <h3 class="font-semibold text-text-color">2. Bagaimana cara menggunakan aplikasi ini?</h3>
-                <p class="text-gray-400">
-                    - Masukkan kata kunci yang ingin Anda cari.<br>
-                    - Pilih negara dan mesin pencari dari pilihan yang tersedia.<br>
-                    - Pilih kategori dan jenis file yang relevan dengan pencarian Anda.<br>
-                    - Aktifkan Mode VIV jika diperlukan.<br>
-                    - Klik tombol "Cari" untuk melanjutkan pencarian.
-                </p>
-            </div>
-            <div class="mb-4">
-                <h3 class="font-semibold text-text-color">3. Apakah saya bisa menggunakan dorking lain?</h3>
-                <p class="text-gray-400">Ya, Anda dapat memilih dorking lain yang relevan dengan kategori Anda atau
-                    menambahkannya di kolom kata kunci.</p>
-            </div>
-            <div class="mb-4">
-                <h3 class="font-semibold text-text-color">4. Apakah pencarian ini legal?</h3>
-                <p class="text-gray-400">Pencarian yang dilakukan harus mematuhi hukum dan kebijakan yang berlaku.
-                    Penggunaan teknik dorking untuk tujuan ilegal adalah tanggung jawab pengguna.</p>
-            </div>
-        </div>
+<!-- FAQ Section -->
+<h2 class="text-xl font-bold mt-4 cursor-pointer faq-header text-text-color flex items-center justify-between"
+    onclick="toggleFAQ()">
+    FAQ
+    <svg id="faqIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-300"
+        viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.584l3.71-4.353a.75.75 0 111.14.976l-4.25 5a.75.75 0 01-1.14 0l-4.25-5a.75.75 0 01.02-1.06z"
+            clip-rule="evenodd" />
+    </svg>
+</h2>
+<div class="faq-content mt-2">
+    <div class="mb-4">
+        <h3 class="font-semibold text-text-color">1. Apa itu Dorking?</h3>
+        <p class="text-gray-400">Dorking adalah metode pencarian tingkat lanjut yang menggunakan query spesifik untuk
+            menemukan informasi tersembunyi di internet. Teknologi ini sering digunakan oleh profesional keamanan untuk
+            mengidentifikasi celah keamanan dan melindungi data.</p>
     </div>
+    <div class="mb-4">
+        <h3 class="font-semibold text-text-color">2. Bagaimana cara menggunakan aplikasi ini?</h3>
+        <p class="text-gray-400">
+            - Masukkan kata kunci dengan presisi tinggi untuk hasil pencarian yang optimal.<br>
+            - Pilih negara dan mesin pencari yang sesuai dengan kebutuhan Anda.<br>
+            - Tentukan kategori dan jenis file untuk mempersempit hasil pencarian.<br>
+            - Aktifkan <strong>Mode VIV</strong> untuk pencarian yang sepenuhnya anonim dan tidak terdeteksi.<br>
+            - Klik tombol <strong>"Cari"</strong> untuk memulai pencarian. Algoritma kami akan melakukan proses dengan
+            kecepatan dan akurasi tinggi.
+        </p>
+    </div>
+</div>
 
     <script>
         // Theme Toggle Functionality
