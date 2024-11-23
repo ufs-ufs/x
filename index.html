@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Pencarian Dorking - UFS DORKING</title>
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3B82F6;
+            --secondary-color: #1F2937;
+            --background-light: #ffffff;
+            --background-dark: #1F2937;
+            --text-light: #1F2937;
+            --text-dark: #ffffff;
+            --input-bg-light: #f3f4f6;
+            --input-bg-dark: #374151;
+            --card-bg-light: #ffffff;
+            --card-bg-dark: #1F2937;
+            --button-hover-bg: #2563EB;
+            --border-color-light: #d1d5db;
+            --border-color-dark: #4B5563;
+        }
+
+        /* Selektor CSS untuk Menerapkan Tema pada Body */
+        body[data-theme="dark"] {
+            --background-color: var(--background-dark);
+            --text-color: var(--text-dark);
+            --input-bg: var(--input-bg-dark);
+            --card-bg: var(--card-bg-dark);
+            --border-color: var(--border-color-dark);
+        }
+
+        body[data-theme="light"] {
+            --background-color: var(--background-light);
+            --text-color: var(--text-light);
+            --input-bg: var(--input-bg-light);
+            --card-bg: var(--card-bg-light);
+            --border-color: var(--border-color-light);
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Kelas Kustom untuk Warna */
+        .text-text-color {
+            color: var(--text-color);
+        }
+
+        .bg-input-bg {
+            background-color: var(--input-bg);
+        }
+
+        .bg-card-bg {
+            background-color: var(--card-bg);
+        }
+
+        .border-border-color {
+            border-color: var(--border-color);
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: inherit;
+        }
+
+        .ripple:active::after {
+            opacity: 1;
+            transition: opacity 0s;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* FAQ Transition */
+        .faq-content {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        .faq-content.show {
+            max-height: 500px; /* Nilai besar untuk memungkinkan konten terlihat */
+            opacity: 1;
+        }
+
+        /* Tombol Cari yang Lebih Prominensial */
+        .cari-button {
+            background-color: var(--primary-color);
+            color: var(--text-dark);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cari-button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        .cari-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        .cari-button::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: inherit;
+        }
+
+        .cari-button:active::after {
+            opacity: 1;
+            transition: opacity 0s;
+        }
+
+        /* Styling untuk Checkbox Group */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-group input {
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+
+<body class="p-5" data-theme="dark">
+    <div class="max-w-lg mx-auto bg-card-bg p-6 rounded-lg shadow-lg transition-colors">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-primary-color text-center">UFS DORKING</h1>
+            <!-- Theme Toggle -->
+            <div class="flex items-center">
+                <span class="mr-2">🌙</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider"></span>
+                </label>
+                <span class="ml-2">☀️</span>
+            </div>
+        </div>
+        <form id="searchForm" class="space-y-4">
+            <!-- Pencarian Kata Kunci -->
+            <div>
+                <label for="keywords" class="block text-text-color">Kata Kunci:</label>
+                <input type="text" id="keywords" name="keywords"
+                    class="border border-border-color p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-primary-color bg-input-bg text-text-color transition-colors"
+                    placeholder="Masukkan kata kunci..." required>
+            </div>
+
+            <!-- Pilihan Negara -->
+            <div>
+                <label for="country" class="block text-text-color">Negara:</label>
+                <select id="country" name="country"
+                    class="border border-border-color p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-primary-color bg-input-bg text-text-color transition-colors"
+                    required>
+                    <option value="" disabled selected>Pilih negara...</option>
+                    <option value="us">Amerika Serikat</option>
+                    <option value="id">Indonesia</option>
+                    <option value="uk">Inggris</option>
+                    <option value="ca">Kanada</option>
+                    <option value="au">Australia</option>
+                    <option value="de">Jerman</option>
+                </select>
+            </div>
+
+            <!-- Pilihan Mesin Pencari (Multi-Select dengan Checkbox) -->
+            <div>
+                <label class="block text-text-color">Mesin Pencari:</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" name="searchEngine" value="google" class="form-checkbox text-primary-color rounded">
+                        Google
+                    </label>
+                    <label>
+                        <input type="checkbox" name="searchEngine" value="bing" class="form-checkbox text-primary-color rounded">
+                        Bing
+                    </label>
+                    <label>
+                        <input type="checkbox" name="searchEngine" value="yahoo" class="form-checkbox text-primary-color rounded">
+                        Yahoo
+                    </label>
+                    <label>
+                        <input type="checkbox" name="searchEngine" value="duckduckgo" class="form-checkbox text-primary-color rounded">
+                        DuckDuckGo
+                    </label>
+                    <label>
+                        <input type="checkbox" name="searchEngine" value="yandex" class="form-checkbox text-primary-color rounded">
+                        Yandex
+                    </label>
+                </div>
+            </div>
+
+            <!-- Pilihan Kategori Dorking -->
+            <div>
+                <label for="category" class="block text-text-color">Kategori:</label>
+                <select id="category" name="category"
+                    class="border border-border-color p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-primary-color bg-input-bg text-text-color transition-colors"
+                    required>
+                    <option value="" disabled selected>Pilih kategori...</option>
+                    <option value="documents">Dokumen</option>
+                    <option value="media">Media</option>
+                    <option value="database">Basis Data</option>
+                    <option value="scripts">Skrip</option>
+                    <option value="images">Gambar</option>
+                    <option value="archives">Arsip</option>
+                </select>
+            </div>
+
+            <!-- Pilihan Jenis File (Multi-Select dengan Checkbox) -->
+            <div id="fileTypeSection" class="hidden">
+                <label class="block text-text-color">Jenis File:</label>
+                <div class="checkbox-group" id="fileTypeOptions">
+                    <!-- Checkbox jenis file akan diisi secara dinamis berdasarkan kategori -->
+                </div>
+            </div>
+
+            <!-- Opsi Mode VIV -->
+            <div>
+                <label class="inline-flex items-center text-text-color">
+                    <input type="checkbox" id="vivMode" name="vivMode"
+                        class="form-checkbox text-primary-color rounded">
+                    <span class="ml-2">Aktifkan Mode VIV (tidak terdeteksi)</span>
+                </label>
+            </div>
+
+            <!-- Dorking Options Section -->
+            <div id="dorkingOptions" class="mb-4"></div>
+
+            <!-- Tombol Cari sebagai Tombol yang Lebih Prominensial -->
+            <button type="submit" class="cari-button ripple">
+                Cari
+            </button>
+        </form>
+
+        <div class="loading hidden" id="loading">
+            <p class="text-gray-400 text-center">Menghasilkan pencarian...</p>
+        </div>
+        <div class="disclaimer text-sm text-gray-400 mt-4 text-center">
+            * Aplikasi ini dibuat untuk tujuan edukasi. Harap digunakan dengan bijak sesuai kebijakan yang berlaku.
+        </div>
+
+        <!-- Link ke Halaman Tutorial Pentesting -->
+        <div class="mt-4 text-center">
+            <a href="tutorial.html" class="text-primary-color underline">🔒 Akses Tutorial Pentesting</a>
+        </div>
+
+        <!-- FAQ Section -->
+        <h2 class="text-xl font-bold mt-4 cursor-pointer faq-header text-text-color flex items-center justify-between"
+            onclick="toggleFAQ()">
+            FAQ
+            <svg id="faqIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-300"
+                viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.584l3.71-4.353a.75.75 0 111.14.976l-4.25 5a.75.75 0 01-1.14 0l-4.25-5a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd" />
+            </svg>
+        </h2>
+        <div class="faq-content mt-2">
+            <div class="mb-4">
+                <h3 class="font-semibold text-text-color">1. Apa itu Dorking?</h3>
+                <p class="text-gray-400">Dorking adalah teknik pencarian menggunakan query spesifik untuk menemukan informasi
+                    tersembunyi di internet.</p>
+            </div>
+            <div class="mb-4">
+                <h3 class="font-semibold text-text-color">2. Bagaimana cara menggunakan aplikasi ini?</h3>
+                <p class="text-gray-400">
+                    - Masukkan kata kunci yang ingin Anda cari.<br>
+                    - Pilih negara dan mesin pencari dari pilihan yang tersedia.<br>
+                    - Pilih kategori dan jenis file yang relevan dengan pencarian Anda.<br>
+                    - Aktifkan Mode VIV jika diperlukan.<br>
+                    - Klik tombol "Cari" untuk melanjutkan pencarian.
+                </p>
+            </div>
+            <div class="mb-4">
+                <h3 class="font-semibold text-text-color">3. Apakah saya bisa menggunakan dorking lain?</h3>
+                <p class="text-gray-400">Ya, Anda dapat memilih dorking lain yang relevan dengan kategori Anda atau
+                    menambahkannya di kolom kata kunci.</p>
+            </div>
+            <div class="mb-4">
+                <h3 class="font-semibold text-text-color">4. Apakah pencarian ini legal?</h3>
+                <p class="text-gray-400">Pencarian yang dilakukan harus mematuhi hukum dan kebijakan yang berlaku.
+                    Penggunaan teknik dorking untuk tujuan ilegal adalah tanggung jawab pengguna.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle Functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const rootElement = document.body; // karena data-theme diterapkan pada body
+
+        // Inisialisasi tema berdasarkan localStorage atau default
+        if (localStorage.getItem('theme') === 'light') {
+            rootElement.setAttribute('data-theme', 'light');
+            themeToggle.checked = true;
+        } else {
+            rootElement.setAttribute('data-theme', 'dark');
+            themeToggle.checked = false;
+        }
+
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                rootElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                rootElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // FAQ Toggle Functionality
+        function toggleFAQ() {
+            const faq = document.querySelector('.faq-content');
+            const faqIcon = document.getElementById('faqIcon');
+            faq.classList.toggle('show');
+            faqIcon.classList.toggle('rotate-180');
+        }
+
+        // Ripple Effect on Buttons
+        const buttons = document.querySelectorAll('.ripple');
+        buttons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                const circle = document.createElement('span');
+                const diameter = Math.max(this.clientWidth, this.clientHeight);
+                const radius = diameter / 2;
+
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${e.clientX - this.getBoundingClientRect().left - radius}px`;
+                circle.style.top = `${e.clientY - this.getBoundingClientRect().top - radius}px`;
+                circle.classList.add('absolute', 'bg-white', 'opacity-25', 'rounded-full', 'animate-ripple');
+
+                const ripple = this.getElementsByClassName('ripple-effect')[0];
+
+                if (ripple) {
+                    ripple.remove();
+                }
+
+                this.appendChild(circle);
+            });
+        });
+
+        // Daftar Jenis File Berdasarkan Kategori
+        const fileTypesByCategory = {
+            documents: [
+                { value: 'pdf', label: 'PDF (.pdf)' },
+                { value: 'doc', label: 'Dokumen Word (.doc)' },
+                { value: 'docx', label: 'Dokumen Word (.docx)' },
+                { value: 'txt', label: 'Teks (.txt)' },
+                { value: 'xlsx', label: 'Spreadsheet Excel (.xlsx)' },
+                { value: 'ppt', label: 'Presentasi PowerPoint (.ppt)' },
+                { value: 'pptx', label: 'Presentasi PowerPoint (.pptx)' },
+                { value: 'odt', label: 'Dokumen OpenDocument (.odt)' },
+                { value: 'rtf', label: 'Rich Text Format (.rtf)' },
+            ],
+            media: [
+                { value: 'mp4', label: 'Video MP4 (.mp4)' },
+                { value: 'jpg', label: 'Gambar JPEG (.jpg)' },
+                { value: 'png', label: 'Gambar PNG (.png)' },
+                { value: 'gif', label: 'Gambar GIF (.gif)' },
+                { value: 'mp3', label: 'Audio MP3 (.mp3)' },
+                { value: 'avi', label: 'Video AVI (.avi)' },
+                { value: 'mkv', label: 'Video MKV (.mkv)' },
+                { value: 'mov', label: 'Video MOV (.mov)' },
+                { value: 'flv', label: 'Video FLV (.flv)' },
+            ],
+            database: [
+                { value: 'sql', label: 'Database SQL (.sql)' },
+                { value: 'db', label: 'Database (.db)' },
+                { value: 'mdb', label: 'Database Microsoft Access (.mdb)' },
+                { value: 'accdb', label: 'Database Microsoft Access (.accdb)' },
+                { value: 'sqlite', label: 'SQLite Database (.sqlite)' },
+                { value: 'bak', label: 'Database Backup (.bak)' },
+            ],
+            scripts: [
+                { value: 'php', label: 'Skrip PHP (.php)' },
+                { value: 'js', label: 'JavaScript (.js)' },
+                { value: 'py', label: 'Python (.py)' },
+                { value: 'rb', label: 'Ruby (.rb)' },
+                { value: 'sh', label: 'Shell Script (.sh)' },
+                { value: 'pl', label: 'Perl (.pl)' },
+                { value: 'bat', label: 'Batch File (.bat)' },
+                { value: 'vbs', label: 'VBScript (.vbs)' },
+            ],
+            images: [
+                { value: 'jpg', label: 'Gambar JPEG (.jpg)' },
+                { value: 'png', label: 'Gambar PNG (.png)' },
+                { value: 'gif', label: 'Gambar GIF (.gif)' },
+                { value: 'bmp', label: 'Gambar BMP (.bmp)' },
+                { value: 'svg', label: 'Gambar SVG (.svg)' },
+                { value: 'tiff', label: 'Gambar TIFF (.tiff)' },
+                { value: 'webp', label: 'Gambar WebP (.webp)' },
+                { value: 'ico', label: 'Icon (.ico)' },
+            ],
+            archives: [
+                { value: 'zip', label: 'Arsip ZIP (.zip)' },
+                { value: 'rar', label: 'Arsip RAR (.rar)' },
+                { value: 'tar', label: 'Arsip TAR (.tar)' },
+                { value: 'gz', label: 'Arsip GZ (.gz)' },
+                { value: '7z', label: 'Arsip 7Z (.7z)' },
+                { value: 'bz2', label: 'Arsip BZ2 (.bz2)' },
+                { value: 'iso', label: 'Image ISO (.iso)' },
+                { value: 'cab', label: 'Cabinet File (.cab)' },
+            ],
+        };
+
+        // Dorking Options
+        const dorkingsByCategory = {
+            documents: ['intitle:"index of" "confidential" "financial report" filetype:xls OR filetype:pdf -html'],
+            media: ['filetype:mp4 "video"'],
+            database: ['filetype:sql "backup"'],
+            scripts: ['filetype:php "configuration"'],
+            images: ['"sensitive data" filetype:jpg'],
+            archives: ['"index of" "backup.zip"'],
+        };
+
+        // Event Listener untuk Kategori File
+        document.getElementById('category').addEventListener('change', function () {
+            const selectedCategory = this.value;
+            const fileTypeSection = document.getElementById('fileTypeSection');
+            const fileTypeOptions = document.getElementById('fileTypeOptions');
+
+            if (selectedCategory && fileTypesByCategory[selectedCategory]) {
+                // Tampilkan bagian Jenis File
+                fileTypeSection.classList.remove('hidden');
+
+                // Reset opsi jenis file
+                fileTypeOptions.innerHTML = '';
+
+                // Menambahkan opsi jenis file berdasarkan kategori yang dipilih
+                fileTypesByCategory[selectedCategory].forEach(file => {
+                    const label = document.createElement('label');
+                    label.innerHTML = `<input type="checkbox" name="fileType" value="${file.value}" class="form-checkbox text-primary-color rounded"> ${file.label}`;
+                    fileTypeOptions.appendChild(label);
+                });
+            } else {
+                // Sembunyikan bagian Jenis File jika tidak ada kategori yang dipilih atau kategori tidak memiliki jenis file
+                fileTypeSection.classList.add('hidden');
+                fileTypeOptions.innerHTML = '';
+            }
+
+            // Reset Dorking Options berdasarkan kategori
+            const dorkingOptionsDiv = document.getElementById('dorkingOptions');
+            dorkingOptionsDiv.innerHTML = ''; // Reset pilihan dorking
+
+            if (selectedCategory && dorkingsByCategory[selectedCategory]) {
+                dorkingsByCategory[selectedCategory].forEach(dork => {
+                    const label = document.createElement('label');
+                    label.className = "text-text-color inline-flex items-center mb-2"; // Warna untuk label dorking
+                    label.innerHTML = `<input type="checkbox" value="${dork}" class="form-checkbox text-primary-color rounded"> <span class="ml-2">${dork}</span>`;
+                    dorkingOptionsDiv.appendChild(label);
+                });
+            }
+        });
+
+        // Fungsi untuk Membangun URL Pencarian dengan Mode VIV
+        function buildSearchURL(engine, query, country, vivEnabled, fileTypes) {
+            let searchURL = '';
+            let finalQuery = query;
+            const glParameter = country ? `&gl=${country}` : '';
+
+            // Menambahkan jenis file ke query jika ada
+            if (fileTypes.length > 0) {
+                const fileTypeQuery = fileTypes.map(type => `filetype:${type}`).join(' OR ');
+                finalQuery += ` (${fileTypeQuery})`;
+            }
+
+            const encodedFinalQuery = encodeURIComponent(finalQuery);
+
+            switch (engine) {
+                case 'google':
+                    searchURL = `https://www.google.com/search?q=${encodedFinalQuery}`;
+                    if (vivEnabled) {
+                        searchURL += `&safe=off&hl=en&gl=us`; // Menonaktifkan SafeSearch dan set gl ke US
+                    }
+                    break;
+                case 'bing':
+                    searchURL = `https://www.bing.com/search?q=${encodedFinalQuery}`;
+                    if (vivEnabled) {
+                        searchURL += `&safe=Off&setmkt=en-US`; // Menonaktifkan SafeSearch dan set market ke US
+                    }
+                    break;
+                case 'yahoo':
+                    searchURL = `https://search.yahoo.com/search?p=${encodedFinalQuery}`;
+                    if (vivEnabled) {
+                        searchURL += `&toggle=1&cop=mss&ei=UTF-8&fr=crmas&p=us`; // Menonaktifkan SafeSearch dan set region ke US
+                    }
+                    break;
+                case 'duckduckgo':
+                    searchURL = `https://duckduckgo.com/?q=${encodedFinalQuery}`;
+                    if (vivEnabled) {
+                        searchURL += `&kp=-1&kl=us-en`; // Menonaktifkan SafeSearch dan set region ke US
+                    }
+                    break;
+                case 'yandex':
+                    searchURL = `https://yandex.com/search/?text=${encodedFinalQuery}`;
+                    if (vivEnabled) {
+                        searchURL += `&safe=off&geo=213`; // Menonaktifkan SafeSearch dan set geo ke Moskow (213)
+                    }
+                    searchURL += `&safese=d`; // Menambahkan parameter untuk menonaktifkan Safe Search
+                    break;
+                default:
+                    break;
+            }
+
+            // Menambahkan parameter negara jika belum ditambahkan
+            if (!searchURL.includes('&gl=') && glParameter) {
+                searchURL += glParameter;
+            }
+
+            return searchURL;
+        }
+
+        // Fungsi untuk Membuka URL dengan Penundaan
+        function openWithDelay(url, delay) {
+            setTimeout(() => {
+                window.open(url, '_blank');
+            }, delay);
+        }
+
+        // Event Listener untuk Submit Form
+        document.getElementById('searchForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Menampilkan indikator loading
+            document.getElementById('loading').classList.remove('hidden');
+
+            // Mendapatkan kata kunci dan sanitasi input
+            let keywords = document.getElementById('keywords').value.trim();
+            if (keywords === "") {
+                alert("Silakan masukkan kata kunci.");
+                document.getElementById('loading').classList.add('hidden');
+                return;
+            }
+
+            // Mendapatkan negara
+            const country = document.getElementById('country').value;
+
+            // Mendapatkan semua mesin pencari yang dipilih
+            const searchEngineCheckboxes = document.querySelectorAll('input[name="searchEngine"]:checked');
+            const selectedEngines = Array.from(searchEngineCheckboxes).map(checkbox => checkbox.value);
+
+            if (selectedEngines.length === 0) {
+                alert("Silakan pilih minimal satu mesin pencari.");
+                document.getElementById('loading').classList.add('hidden');
+                return;
+            }
+
+            // Mendapatkan kategori dan dorking yang dipilih
+            const category = document.getElementById('category').value;
+            const selectedDorks = Array.from(document.querySelectorAll('#dorkingOptions input:checked')).map(input => input.value);
+            const dorkQuery = selectedDorks.length > 0 ? selectedDorks.join(' OR ') : '';
+
+            // Menyusun query awal
+            let searchQuery = keywords + ' ' + dorkQuery;
+
+            // Mendapatkan semua jenis file yang dipilih
+            const fileTypeCheckboxes = document.querySelectorAll('input[name="fileType"]:checked');
+            const selectedFileTypes = Array.from(fileTypeCheckboxes).map(checkbox => checkbox.value);
+
+            // Mendapatkan status Mode VIV
+            const vivEnabled = document.getElementById('vivMode').checked;
+
+            // Membangun dan membuka URL pencarian untuk setiap mesin pencari yang dipilih dengan penundaan
+            selectedEngines.forEach((engine, index) => {
+                const searchURL = buildSearchURL(engine, searchQuery, country, vivEnabled, selectedFileTypes);
+                // Menambahkan penundaan 500ms antara setiap pembukaan tab
+                openWithDelay(searchURL, index * 500);
+            });
+
+            // Menyembunyikan indikator loading setelah semua tab dibuka
+            const totalDelay = selectedEngines.length * 500;
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, totalDelay + 500);
+        });
+    </script>
+</body>
+
+</html>
