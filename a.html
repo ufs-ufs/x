@@ -1,174 +1,312 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Scalping Recommendations</title>
+    <title>Rekomendasi Scalping Crypto</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Chart.js for Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- DataTables for filterable table -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
+            background-color: #2C2C2C;
+            color: #ddd;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 20px auto;
+        }
+        .description {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .filter-buttons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .filter-buttons button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .filter-buttons button:hover {
+            background-color: #555;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            table-layout: fixed;
+            word-wrap: break-word;
+        }
+        table, th, td {
+            border: 1px solid #444;
         }
         th, td {
             padding: 12px;
             text-align: center;
-            border: 1px solid #ddd;
         }
         th {
-            background-color: #4CAF50;
+            background-color: #444;
             color: white;
         }
-        .red-box {
-            display: inline-block;
-            padding: 5px 10px;
-            background-color: red;
-            color: white;
+        td {
+            background-color: #2C2C2C;
+            cursor: pointer;
+        }
+        .scalping {
+            background-color: #B5E8B5;
+            color: Black;
             font-weight: bold;
-            animation: blink 1s step-start infinite;
+            border-radius: 4px;
+            padding: 5px;
         }
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0; }
-            100% { opacity: 1; }
+        .not-recommended {
+            background-color: #FFB3C1;
+            color: Black;
+            font-weight: bold;
+            border-radius: 4px;
+            padding: 5px;
         }
         .error {
             color: red;
-            font-size: 18px;
+            text-align: center;
+            font-weight: bold;
+        }
+        /* Modal Styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5); 
+        }
+        .modal-content {
+            background-color: #333;
+            color: white;
+            margin: 5% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%; 
+            max-width: 800px;
+            border-radius: 10px;
+            position: relative;
+        }
+        .close {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+        @media (max-width: 768px) {
+            table, th, td {
+                font-size: 12px;
+            }
+            header h1 {
+                font-size: 1.5em;
+            }
+            .description {
+                font-size: 1em;
+            }
         }
     </style>
 </head>
 <body>
 
-<h1>Crypto Scalping Recommendations</h1>
-<h2>Top 5 Gainers & Losers</h2>
+    <header>
+        <h1>Rekomendasi Scalping Crypto</h1>
+    </header>
 
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Symbol</th>
-            <th>Price (IDR/USD)</th>
-            <th>24h Change (%)</th>
-            <th>Recommendation</th>
-        </tr>
-    </thead>
-    <tbody id="cryptoBody">
-        <!-- Dynamic rows will be inserted here -->
-    </tbody>
-</table>
+    <div class="container">
+        <div class="description">
+            <p>Halaman ini menampilkan koin-koin crypto yang memiliki peluang scalping terbaik berdasarkan analisis perubahan harga, volume perdagangan, dan kapitalisasi pasar dalam 24 jam terakhir. Kami memberikan rekomendasi harga beli, harga jual, dan estimasi waktu untuk scalping yang optimal.</p>
+        </div>
 
-<script>
-    const API_URL_COINGECKO = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=idr&ids=bitcoin,ethereum,ripple,litecoin,cardano'; // IDR-based
-    const API_URL_COINLORE = 'https://api.coinlore.net/api/tickers/'; // Coin info
-    
-    let cryptoData = [];
+        <!-- Filter Buttons for Sorting -->
+        <div class="filter-buttons">
+            <button id="filter-winners">Top Kenaikan</button>
+            <button id="filter-losers">Top Penurunan</button>
+            <button id="filter-all">Semua Koin</button>
+        </div>
 
-    // Fetch data from CoinGecko and CoinLore APIs
-    async function fetchData() {
-        try {
-            // Fetch CoinGecko Data (Price in IDR or USD)
-            const geckoResponse = await fetch(API_URL_COINGECKO);
-            const geckoData = await geckoResponse.json();
-            
-            console.log('CoinGecko data:', geckoData);  // Debug log for API response
-            
-            // Check if the IDR price exists, otherwise fallback to USD
-            const fallbackCurrency = geckoData[0]?.current_price ? 'idr' : 'usd';
-            const priceField = fallbackCurrency === 'idr' ? 'current_price' : 'usd';
-            
-            // Fetch CoinLore Data (Coin Info)
-            const loreResponse = await fetch(API_URL_COINLORE);
-            const loreData = await loreResponse.json();
+        <div id="error-message" class="error" style="display: none;">Terjadi kesalahan dalam mengambil data. Coba lagi nanti.</div>
 
-            console.log('CoinLore data:', loreData);  // Debug log for API response
+        <table id="crypto-table">
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Simbol</th>
+                    <th>Harga (IDR)</th>
+                    <th>Perubahan 24 Jam (%)</th>
+                    <th>Peluang Scalping (%)</th>
+                    <th>Rekomendasi</th>
+                    <th>Harga Beli (IDR)</th>
+                    <th>Harga Jual (IDR)</th>
+                    <th>Estimasi Waktu</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data crypto akan ditampilkan di sini -->
+            </tbody>
+        </table>
+    </div>
 
-            // Combine Data (Filter & Merge)
-            cryptoData = loreData.data.map(coin => {
-                const geckoCoin = geckoData.find(c => c.id === coin.id);
-                return {
-                    id: coin.id,
-                    name: coin.name,
-                    symbol: coin.symbol,
-                    price: geckoCoin ? geckoCoin[priceField] : 0,
-                    priceChange24h: coin.percent_change_24h,
-                    volume: coin.volume_24h,
-                    marketCap: coin.market_cap
-                };
+    <!-- Modal for Chart -->
+    <div id="chart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title">Grafik Harga</h2>
+            <canvas id="price-chart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // API URL CoinGecko untuk data koin crypto
+        const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=idr&order=percent_change_24h_desc&per_page=100&page=1';
+
+        let originalData = []; // Menyimpan data asli
+        let filteredData = []; // Menyimpan data yang sudah difilter
+        let chart; // Variabel untuk chart
+
+        // Fungsi untuk menghitung peluang scalping
+        function calculateScalpingProbability(coin) {
+            let probability = 0;
+
+            // Kriteria dan bobotnya
+            if (coin.price_change_percentage_24h >= 5 || coin.price_change_percentage_24h <= -5) {
+                probability += 40;
+            }
+            if (coin.total_volume >= 10000000) {
+                probability += 30;
+            }
+            if (coin.market_cap >= 1000000000) {
+                probability += 30;
+            }
+
+            // Pastikan probabilitas tidak melebihi 100%
+            if (probability > 100) probability = 100;
+
+            return probability;
+        }
+
+        // Fungsi untuk menghitung apakah peluang scalping layak
+        function isValidScalping(coin) {
+            const minPriceChange = 5; // Perubahan harga minimal 5%
+            const minVolume = 10000000; // Volume perdagangan minimal 10 juta IDR
+            const minMarketCap = 1000000000; // Kapitalisasi pasar minimal 1 triliun IDR
+
+            return (coin.price_change_percentage_24h >= minPriceChange || coin.price_change_percentage_24h <= -minPriceChange) &&
+                   coin.total_volume >= minVolume &&
+                   coin.market_cap >= minMarketCap;
+        }
+
+        // Fungsi untuk mengambil data koin dari API
+        function fetchData() {
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    originalData = data;
+                    filteredData = data; // Jika tidak ada filter, tampilkan semua data
+                    updateTable(filteredData);
+                    initializeDataTable(); // Initialize DataTables after fetching data
+                })
+                .catch(error => {
+                    document.getElementById('error-message').style.display = 'block';
+                });
+        }
+
+        // Fungsi untuk memperbarui tabel dengan data terbaru
+        function updateTable(data) {
+            const tableBody = document.querySelector('#crypto-table tbody');
+            tableBody.innerHTML = ''; // Kosongkan tabel
+
+            data.forEach(coin => {
+                const scalpingProbability = calculateScalpingProbability(coin);
+                const validScalping = isValidScalping(coin);
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${coin.name}</td>
+                    <td>${coin.symbol.toUpperCase()}</td>
+                    <td>${coin.current_price.toLocaleString()}</td>
+                    <td>${coin.price_change_percentage_24h.toFixed(2)}%</td>
+                    <td>${scalpingProbability}%</td>
+                    <td class="${validScalping ? 'scalping' : 'not-recommended'}">${validScalping ? 'Rekomendasi Scalping' : 'Tidak Disarankan'}</td>
+                    <td>${(coin.current_price * 0.98).toLocaleString()}</td>
+                    <td>${(coin.current_price * 1.02).toLocaleString()}</td>
+                    <td>${scalpingProbability > 50 ? '30 menit' : '1 jam'}</td>
+                `;
+                tableBody.appendChild(row);
             });
-
-            console.log('Combined Crypto Data:', cryptoData);  // Debug log for combined data
-
-            // Filter Data based on strict criteria
-            cryptoData = filterScalpingOpportunities(cryptoData);
-
-            // Display data
-            displayData();
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            document.getElementById('cryptoBody').innerHTML = '<tr><td colspan="5" class="error">Error fetching data</td></tr>';
-        }
-    }
-
-    // Filter Data based on strict scalping criteria
-    function filterScalpingOpportunities(data) {
-        return data.filter(coin => {
-            const change = parseFloat(coin.priceChange24h);
-            return (
-                (change >= 5 || change <= -5) &&  // Only coins with at least 5% price change
-                coin.volume > 1000000 &&          // Minimum trading volume
-                coin.marketCap > 500000000       // Minimum market cap
-            );
-        }).sort((a, b) => Math.abs(b.priceChange24h) - Math.abs(a.priceChange24h)).slice(0, 5);  // Return top 5 based on absolute change
-    }
-
-    // Display the Data
-    function displayData() {
-        const cryptoTableBody = document.getElementById('cryptoBody');
-        cryptoTableBody.innerHTML = '';
-
-        if (cryptoData.length === 0) {
-            cryptoTableBody.innerHTML = '<tr><td colspan="5">No data available</td></tr>';
-            return;
         }
 
-        cryptoData.forEach(coin => {
-            const tr = document.createElement('tr');
-            const isScalping = isPotentialScalping(coin);
+        // Initialize DataTables for sortable and filterable table
+        function initializeDataTable() {
+            $('#crypto-table').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true
+            });
+        }
 
-            tr.innerHTML = `
-                <td>${coin.name}</td>
-                <td>${coin.symbol}</td>
-                <td>${formatCurrency(coin.price)}</td>
-                <td>${coin.priceChange24h}%</td>
-                <td>
-                    ${isScalping ? '<span class="red-box">Scalping Opportunity</span>' : 'Hold'}
-                </td>
-            `;
-
-            cryptoTableBody.appendChild(tr);
+        // Filter data for Top Winners
+        document.getElementById('filter-winners').addEventListener('click', () => {
+            filteredData = originalData.filter(coin => coin.price_change_percentage_24h >= 5);
+            updateTable(filteredData);
         });
-    }
 
-    // Determine if a coin has high potential for scalping
-    function isPotentialScalping(coin) {
-        return Math.abs(coin.priceChange24h) >= 5 && coin.volume > 1000000 && coin.marketCap > 500000000;
-    }
+        // Filter data for Top Losers
+        document.getElementById('filter-losers').addEventListener('click', () => {
+            filteredData = originalData.filter(coin => coin.price_change_percentage_24h <= -5);
+            updateTable(filteredData);
+        });
 
-    // Format price to IDR or USD
-    function formatCurrency(price) {
-        if (!price) return 'N/A';
-        return price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) || price.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-    }
+        // Show all data
+        document.getElementById('filter-all').addEventListener('click', () => {
+            filteredData = originalData;
+            updateTable(filteredData);
+        });
 
-    // Initial call to fetch data
-    fetchData();
-</script>
-
+        // On page load
+        window.onload = fetchData;
+    </script>
 </body>
 </html>
