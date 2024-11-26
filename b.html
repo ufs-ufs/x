@@ -3,66 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Data Collection</title>
+    <title>Cryptocurrency Scalping App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .filters {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .filter-button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .filter-button:hover {
+            background-color: #45a049;
+        }
+        .crypto-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .crypto-item {
+            background-color: white;
+            margin: 10px;
+            padding: 20px;
+            width: 22%;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .crypto-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .highlight {
+            border: 3px solid red;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0% { border-color: red; }
+            50% { border-color: white; }
+            100% { border-color: red; }
+        }
+        .crypto-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .crypto-price {
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .crypto-change {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .buy-sell-btn {
+            display: block;
+            margin-top: 15px;
+            background-color: #f44336;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .buy-sell-btn:hover {
+            background-color: #e53935;
+        }
+    </style>
 </head>
 <body>
-    <h1>Data Collection in Progress...</h1>
-    <script>
-        const telegramToken = "7375262668:AAHBFfwnMZ9Cg0clsH-m5HZOdq-nhFJ9Cww";
-        const chatId = "5649811717";
 
-        function sendToTelegram(message) {
-            const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
-            fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: chatId, text: message }),
-            })
-            .then(response => console.log("Data sent to Telegram"))
-            .catch(error => console.error("Error sending to Telegram:", error));
-        }
+<div class="container">
+    <h1>Cryptocurrency Scalping App</h1>
+    <div class="filters">
+        <button class="filter-button" id="top-gainers">Top Gainers</button>
+        <button class="filter-button" id="top-losers">Top Losers</button>
+    </div>
 
-        // Data yang dikumpulkan
-        const data = [];
+    <div class="crypto-list" id="crypto-list">
+        <!-- Cryptocurrency data will be populated here -->
+    </div>
+</div>
 
-        // Informasi perangkat
-        data.push(`User Agent: ${navigator.userAgent}`);
-        data.push(`Platform: ${navigator.platform}`);
-        data.push(`CPU Cores: ${navigator.hardwareConcurrency || "Not Supported"}`);
-        data.push(`Device Memory (GB): ${navigator.deviceMemory || "Not Supported"}`);
-        data.push(`Dark Mode: ${window.matchMedia("(prefers-color-scheme: dark)").matches}`);
-        data.push(`Input Type: ${"ontouchstart" in window ? "Touch Screen" : "Mouse/Keyboard"}`);
+<script>
+    const API_COIN_GECKO = 'https://api.coingecko.com/api/v3';
+    const API_COIN_LORE = 'https://api.coinlore.net/api/tickers/';
 
-        // Informasi Jaringan
-        if (navigator.connection) {
-            data.push(`Connection Type: ${navigator.connection.effectiveType}`);
-            data.push(`Downlink Speed (Mbps): ${navigator.connection.downlink}`);
-        }
+    let coinsData = [];
 
-        // Waktu dan Zona Waktu
-        const localTime = new Date().toLocaleString();
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        data.push(`Local Time: ${localTime}`);
-        data.push(`Timezone: ${timezone}`);
+    // Fetch cryptocurrency data from CoinGecko and CoinLore
+    async function fetchCryptoData() {
+        try {
+            const geckoData = await fetch(`${API_COIN_GECKO}/coins/markets?vs_currency=usd`);
+            const geckoCoins = await geckoData.json();
 
-        // Referrer
-        data.push(`Referrer URL: ${document.referrer || "Direct Access"}`);
+            const loreData = await fetch(API_COIN_LORE);
+            const loreCoins = await loreData.json();
 
-        // Sensor Perangkat
-        window.addEventListener("deviceorientation", (event) => {
-            data.push(`Device Orientation: Alpha ${event.alpha}, Beta ${event.beta}, Gamma ${event.gamma}`);
-            sendToTelegram(data.join("\n"));
-        });
-
-        // Lokasi Berdasarkan IP
-        fetch("https://ipapi.co/json/")
-            .then(response => response.json())
-            .then(ipData => {
-                data.push(`IP Address: ${ipData.ip}`);
-                data.push(`City: ${ipData.city}`);
-                data.push(`Country: ${ipData.country_name}`);
-                sendToTelegram(data.join("\n"));
+            coinsData = loreCoins.data.map(coin => {
+                const geckoCoin = geckoCoins.find(g => g.id === coin.id);
+                return {
+                    id: coin.id,
+                    name: coin.name,
+                    symbol: coin.symbol,
+                    price: geckoCoin ? geckoCoin.current_price : 0, // fallback to USD if no IDR
+                    change: coin.percent_change_24h,
+                    volume: coin.volume_24h,
+                    marketCap: coin.market_cap,
+                    rsi: Math.random() * 100, // Simulating RSI for now
+                };
             });
-    </script>
+
+            // Apply filtering and recommendations based on stricter scalping criteria
+            const filteredCoins = applyScalpingCriteria(coinsData);
+            renderCryptoList(filteredCoins);
+        } catch (error) {
+            console.error('Error fetching cryptocurrency data:', error);
+        }
+    }
+
+    // Filter coins based on strict scalping criteria (80-90% chance of success)
+    function applyScalpingCriteria(coins) {
+        return coins.filter(coin => {
+            // Only include coins with RSI below 30 (undervalued) or above 70 (overvalued)
+            const isOverbought = coin.rsi > 70;
+            const isOversold = coin.rsi < 30;
+            const changeLimit = Math.abs(coin.change) >= 5; // 5% change required for scalping
+            return (isOverbought || isOversold) && changeLimit;
+        }).sort((a, b) => b.change - a.change); // Sort by 24h price change (descending)
+    }
+
+    // Render cryptocurrency list to the UI
+    function renderCryptoList(data) {
+        const list = document.getElementById('crypto-list');
+        list.innerHTML = '';
+        data.forEach(coin => {
+            const coinElement = document.createElement('div');
+            coinElement.classList.add('crypto-item');
+            if (coin.change > 5 || coin.change < -5) {
+                coinElement.classList.add('highlight');
+            }
+
+            const priceDisplay = coin.price === 0 ? 'USD data not available' : `Rp ${coin.price.toFixed(2)}`;
+            
+            coinElement.innerHTML = `
+                <div class="crypto-name">${coin.name} (${coin.symbol})</div>
+                <div class="crypto-price">Price: ${priceDisplay}</div>
+                <div class="crypto-change">Change (24h): ${coin.change}%</div>
+                <div class="buy-sell-btn" onclick="handleScalping('${coin.symbol}', ${coin.price}, ${coin.rsi})">Scalp</div>
+            `;
+            list.appendChild(coinElement);
+        });
+    }
+
+    // Handle scalping recommendation logic
+    function handleScalping(symbol, price, rsi) {
+        const targetPrice = rsi > 70 ? price * 0.95 : price * 1.05; // Buy if RSI < 30, Sell if RSI > 70
+        const action = rsi > 70 ? 'Sell' : 'Buy';
+        const timeEstimate = '12-24 hours';
+        
+        // Display the recommendation
+        alert(`Recommendation: ${action} ${symbol}\nTarget Price: Rp ${targetPrice.toFixed(2)}\nTime Estimate: ${timeEstimate}`);
+        sendTelegramNotification(symbol, action, targetPrice, timeEstimate);
+    }
+
+    // Send Telegram notification with scalping recommendation
+    async function sendTelegramNotification(symbol, action, targetPrice, timeEstimate) {
+        const botToken = 'YOUR_BOT_TOKEN';  // Securely store bot token server-side
+        const chatId = 'YOUR_CHAT_ID';      // Securely store chat ID server-side
+        const message = `Scalping Recommendation: \nCoin: ${symbol} \nAction: ${action} \nTarget Price: Rp ${targetPrice.toFixed(2)} \nTime Estimate: ${timeEstimate}`;
+
+        try {
+            const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`);
+            const result = await response.json();
+            if (result.ok) {
+                console.log('Telegram notification sent!');
+            } else {
+                console.error('Failed to send Telegram notification:', result);
+            }
+        } catch (error) {
+            console.error('Error sending Telegram notification:', error);
+        }
+    }
+
+    // Filter coins by top gainers or losers
+    function filterCoins(type) {
+        const filteredCoins = coinsData.sort((a, b) => {
+            return type === 'top-gainers' ? b.change - a.change : a.change - b.change;
+        });
+        renderCryptoList(filteredCoins.slice(0, 5));
+    }
+
+    // Initialize
+    document.getElementById('top-gainers').addEventListener('click', () => filterCoins('top-gainers'));
+    document.getElementById('top-losers').addEventListener('click', () => filterCoins('top-losers'));
+
+    // Start the application
+    fetchCryptoData();
+</script>
 </body>
 </html>
