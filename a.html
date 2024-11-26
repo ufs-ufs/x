@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Scalping Recommendations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .red-box {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: red;
+            color: white;
+            font-weight: bold;
+            animation: blink 1s step-start infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .error {
+            color: red;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Crypto Scalping Recommendations</h1>
+<h2>Top 5 Gainers & Losers</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Symbol</th>
+            <th>Price (IDR/USD)</th>
+            <th>24h Change (%)</th>
+            <th>Recommendation</th>
+        </tr>
+    </thead>
+    <tbody id="cryptoBody">
+        <!-- Dynamic rows will be inserted here -->
+    </tbody>
+</table>
+
+<script>
+    const API_URL_COINGECKO = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=idr&ids=bitcoin,ethereum,ripple,litecoin,cardano'; // IDR-based
+    const API_URL_COINLORE = 'https://api.coinlore.net/api/tickers/'; // Coin info
+    
+    let cryptoData = [];
+
+    // Fetch data from CoinGecko and CoinLore APIs
+    async function fetchData() {
+        try {
+            // Fetch CoinGecko Data (Price in IDR or USD)
+            const geckoResponse = await fetch(API_URL_COINGECKO);
+            const geckoData = await geckoResponse.json();
+            
+            console.log('CoinGecko data:', geckoData);  // Debug log for API response
+            
+            // Check if the IDR price exists, otherwise fallback to USD
+            const fallbackCurrency = geckoData[0]?.current_price ? 'idr' : 'usd';
+            const priceField = fallbackCurrency === 'idr' ? 'current_price' : 'usd';
+            
+            // Fetch CoinLore Data (Coin Info)
+            const loreResponse = await fetch(API_URL_COINLORE);
+            const loreData = await loreResponse.json();
+
+            console.log('CoinLore data:', loreData);  // Debug log for API response
+
+            // Combine Data (Filter & Merge)
+            cryptoData = loreData.data.map(coin => {
+                const geckoCoin = geckoData.find(c => c.id === coin.id);
+                return {
+                    id: coin.id,
+                    name: coin.name,
+                    symbol: coin.symbol,
+                    price: geckoCoin ? geckoCoin[priceField] : 0,
+                    priceChange24h: coin.percent_change_24h,
+                    volume: coin.volume_24h,
+                    marketCap: coin.market_cap
+                };
+            });
+
+            console.log('Combined Crypto Data:', cryptoData);  // Debug log for combined data
+
+            // Filter Data based on strict criteria
+            cryptoData = filterScalpingOpportunities(cryptoData);
+
+            // Display data
+            displayData();
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            document.getElementById('cryptoBody').innerHTML = '<tr><td colspan="5" class="error">Error fetching data</td></tr>';
+        }
+    }
+
+    // Filter Data based on strict scalping criteria
+    function filterScalpingOpportunities(data) {
+        return data.filter(coin => {
+            const change = parseFloat(coin.priceChange24h);
+            return (
+                (change >= 5 || change <= -5) &&  // Only coins with at least 5% price change
+                coin.volume > 1000000 &&          // Minimum trading volume
+                coin.marketCap > 500000000       // Minimum market cap
+            );
+        }).sort((a, b) => Math.abs(b.priceChange24h) - Math.abs(a.priceChange24h)).slice(0, 5);  // Return top 5 based on absolute change
+    }
+
+    // Display the Data
+    function displayData() {
+        const cryptoTableBody = document.getElementById('cryptoBody');
+        cryptoTableBody.innerHTML = '';
+
+        if (cryptoData.length === 0) {
+            cryptoTableBody.innerHTML = '<tr><td colspan="5">No data available</td></tr>';
+            return;
+        }
+
+        cryptoData.forEach(coin => {
+            const tr = document.createElement('tr');
+            const isScalping = isPotentialScalping(coin);
+
+            tr.innerHTML = `
+                <td>${coin.name}</td>
+                <td>${coin.symbol}</td>
+                <td>${formatCurrency(coin.price)}</td>
+                <td>${coin.priceChange24h}%</td>
+                <td>
+                    ${isScalping ? '<span class="red-box">Scalping Opportunity</span>' : 'Hold'}
+                </td>
+            `;
+
+            cryptoTableBody.appendChild(tr);
+        });
+    }
+
+    // Determine if a coin has high potential for scalping
+    function isPotentialScalping(coin) {
+        return Math.abs(coin.priceChange24h) >= 5 && coin.volume > 1000000 && coin.marketCap > 500000000;
+    }
+
+    // Format price to IDR or USD
+    function formatCurrency(price) {
+        if (!price) return 'N/A';
+        return price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) || price.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    }
+
+    // Initial call to fetch data
+    fetchData();
+</script>
+
+</body>
+</html>
