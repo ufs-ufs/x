@@ -1,735 +1,212 @@
 <!DOCTYPE html>
-<html lang="id">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Pencarian Dorking - UFS DORKING</title>
-    <!-- TailwindCSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Roboto -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Rekomendasi Scalping Crypto</title>
     <style>
-        :root {
-            --primary-color: #3B82F6;
-            --secondary-color: #1F2937;
-            --background-light: #ffffff;
-            --background-dark: #1F2937;
-            --text-light: #1F2937;
-            --text-dark: #ffffff;
-            --input-bg-light: #f3f4f6;
-            --input-bg-dark: #374151;
-            --card-bg-light: #ffffff;
-            --card-bg-dark: #1F2937;
-            --button-hover-bg: #2563EB;
-            --border-color-light: #d1d5db;
-            --border-color-dark: #4B5563;
-        }
-
-        /* Selektor CSS untuk Menerapkan Tema pada Body */
-        body[data-theme="dark"] {
-            --background-color: var(--background-dark);
-            --text-color: var(--text-dark);
-            --input-bg: var(--input-bg-dark);
-            --card-bg: var(--card-bg-dark);
-            --border-color: var(--border-color-dark);
-        }
-
-        body[data-theme="light"] {
-            --background-color: var(--background-light);
-            --text-color: var(--text-light);
-            --input-bg: var(--input-bg-light);
-            --card-bg: var(--card-bg-light);
-            --border-color: var(--border-color-light);
-        }
-
         body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            font-family: 'Roboto', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 20px;
         }
-
-        /* Kelas Kustom untuk Warna */
-        .text-text-color {
-            color: var(--text-color);
+        h1 {
+            text-align: center;
+            color: #333;
         }
-
-        .bg-input-bg {
-            background-color: var(--input-bg);
-        }
-
-        .bg-card-bg {
-            background-color: var(--card-bg);
-        }
-
-        .border-border-color {
-            border-color: var(--border-color);
-        }
-
-        /* Ripple Effect */
-        .ripple {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ripple::after {
-            content: "";
-            position: absolute;
+        table {
             width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background: rgba(255, 255, 255, 0.3);
-            opacity: 0;
-            transition: opacity 0.3s;
-            border-radius: inherit;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         }
-
-        .ripple:active::after {
-            opacity: 1;
-            transition: opacity 0s;
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
-
-        /* Toggle Switch */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
+        th {
+            background-color: #4CAF50;
+            color: white;
         }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
+        tr:hover {
+            background-color: #f1f1f1;
         }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 24px;
+        img {
+            width: 30px;
+            height: 30px;
         }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
+        .recommended {
+            background-color: #d4edda;
+            font-weight: bold;
         }
-
-        input:checked + .slider {
-            background-color: var(--primary-color);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        /* FAQ Transition */
-        .faq-content {
-            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-        }
-
-        .faq-content.show {
-            max-height: 500px; /* Nilai besar untuk memungkinkan konten terlihat */
-            opacity: 1;
-        }
-
-        /* Tombol Cari yang Lebih Prominensial */
-        .cari-button {
-            background-color: var(--primary-color);
-            color: var(--text-dark);
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.375rem;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cari-button:hover {
-            background-color: var(--button-hover-bg);
-        }
-
-        .cari-button:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-        }
-
-        .cari-button::after {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background: rgba(255, 255, 255, 0.3);
-            opacity: 0;
-            transition: opacity 0.3s;
-            border-radius: inherit;
-        }
-
-        .cari-button:active::after {
-            opacity: 1;
-            transition: opacity 0s;
-        }
-
-        /* Styling untuk Checkbox Group */
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .checkbox-group input {
-            margin-right: 0.5rem;
-        }
-
-        /* Loading Spinner */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 1rem;
-        }
-
-        .hidden {
-            display: none;
+        canvas {
+            margin-top: 20px;
         }
     </style>
+    <!-- Tambahkan Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+<body>
+    <h1>Rekomendasi Scalping Crypto</h1>
+    <p>Halaman ini menampilkan analisis koin-koin crypto dengan peluang scalping terbaik berdasarkan indikator teknikal, perubahan harga, dan volume perdagangan.</p>
 
-<body class="p-5" data-theme="dark">
-    <div class="max-w-lg mx-auto bg-card-bg p-6 rounded-lg shadow-lg transition-colors">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-primary-color text-center">UFS DORKING!</h1>
-            <!-- Theme Toggle -->
-            <div class="flex items-center">
-                <span class="mr-2">🌙</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="themeToggle">
-                    <span class="slider"></span>
-                </label>
-                <span class="ml-2">☀️</span>
-            </div>
-        </div>
-        <form id="searchForm" class="space-y-4" onsubmit="sendToTelegram(event)">
-            <!-- Pencarian Kata Kunci -->
-            <div>
-                <label for="keywords" class="block text-text-color">Kata Kunci:</label>
-                <input type="text" id="keywords" name="keywords"
-                    class="border border-border-color p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-primary-color bg-input-bg text-text-color transition-colors"
-                    placeholder="Masukkan kata kunci..." required>
-            </div>
+    <table id="coin-table">
+        <thead>
+            <tr>
+                <th>Nama</th>
+                <th>Simbol</th>
+                <th>Harga (USD)</th>
+                <th>Perubahan 24 Jam (%)</th>
+                <th>Peluang Scalping (%)</th>
+                <th>Rekomendasi</th>
+            </tr>
+        </thead>
+        <tbody id="coin-list">
+            <!-- Data akan dimasukkan di sini menggunakan JavaScript -->
+        </tbody>
+    </table>
 
-            <!-- Negara (Parameter yang mempengaruhi hasil pencarian) -->
-            <div>
-                <label for="country" class="block text-text-color">Negara: (Parameter yang mempengaruhi hasil pencarian)</label>
-                <select id="country" name="country"
-                    class="border border-border-color p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-primary-color bg-input-bg text-text-color transition-colors"
-                    required>
-                    <option value="" disabled selected>Pilih negara...</option>
-                    <option value="us">Amerika Serikat</option>
-                    <option value="id">Indonesia</option>
-                    <option value="uk">Inggris</option>
-                    <option value="ca">Kanada</option>
-                    <option value="au">Australia</option>
-                    <option value="de">Jerman</option>
-                </select>
-            </div>
-
-            <!-- Pilihan Mesin Pencari (Multi-Select dengan Checkbox) -->
-            <div>
-                <label class="block text-text-color">Mesin Pencari:</label>
-                <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" name="searchEngine" value="google" class="form-checkbox text-primary-color rounded">
-                        Google
-                    </label>
-                    <label>
-                        <input type="checkbox" name="searchEngine" value="bing" class="form-checkbox text-primary-color rounded">
-                        Bing
-                    </label>
-                    <label>
-                        <input type="checkbox" name="searchEngine" value="yahoo" class="form-checkbox text-primary-color rounded">
-                        Yahoo
-                    </label>
-                    <label>
-                        <input type="checkbox" name="searchEngine" value="duckduckgo" class="form-checkbox text-primary-color rounded">
-                        DuckDuckGo
-                    </label>
-                    <label>
-                        <input type="checkbox" name="searchEngine" value="yandex" class="form-checkbox text-primary-color rounded">
-                        Yandex
-                    </label>
-                </div>
-            </div>
-
-            <!-- Pilihan Kategori Dorking -->
-            <div>
-                <label for="category" class="block text-text-color">Kategori:</label>
-                <select id="category" name="category"
-                    class="border border-border-color p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-primary-color bg-input-bg text-text-color transition-colors"
-                    required>
-                    <option value="" disabled selected>Pilih kategori...</option>
-                    <option value="documents">Dokumen</option>
-                    <option value="media">Media</option>
-                    <option value="database">Basis Data</option>
-                    <option value="scripts">Skrip</option>
-                    <option value="images">Gambar</option>
-                    <option value="archives">Arsip</option>
-                </select>
-            </div>
-
-            <!-- Pilihan Jenis File (Multi-Select dengan Checkbox) -->
-            <div id="fileTypeSection" class="hidden">
-                <label class="block text-text-color">Jenis File:</label>
-                <div class="checkbox-group" id="fileTypeOptions">
-                    <!-- Checkbox jenis file akan diisi secara dinamis berdasarkan kategori -->
-                </div>
-            </div>
-
-            <!-- Opsi Mode VIV -->
-            <div>
-                <label class="inline-flex items-center text-text-color">
-                    <input type="checkbox" id="vivMode" name="vivMode"
-                        class="form-checkbox text-primary-color rounded">
-                    <span class="ml-2">Aktifkan Mode VIV (tidak terdeteksi)</span>
-                </label>
-            </div>
-
-            <!-- Dorking Options Section -->
-            <div id="dorkingOptions" class="mb-4"></div>
-
-            <!-- Tombol Cari sebagai Tombol yang Lebih Prominensial -->
-            <button type="submit" class="cari-button ripple">
-                Cari
-            </button>
-        </form>
-
-        <div class="loading hidden" id="loading">
-            <p class="text-gray-400 text-center">Menghasilkan pencarian...</p>
-        </div>
-        <div class="disclaimer text-sm text-gray-400 mt-4 text-center">
-            * Aplikasi ini dibuat untuk tujuan edukasi. Harap digunakan dengan bijak dan sesuai dengan kebijakan yang berlaku. Segala bentuk tindakan kriminal yang dilakukan menggunakan aplikasi ini sepenuhnya menjadi tanggung jawab pengguna, dan saya (UFS) tidak bertanggung jawab atas hal tersebut.
-        </div>
-
-        <!-- Link ke Halaman Tutorial Pentesting -->
-        <div class="mt-4 text-center">
-            <a href="tutorial.html" class="text-primary-color underline">🔒 Akses T.Pentesting</a>
-        </div>
-
-        <!-- FAQ Section -->
-        <h2 class="text-xl font-bold mt-4 cursor-pointer faq-header text-text-color flex items-center justify-between"
-            onclick="toggleFAQ()">
-            FAQ
-            <svg id="faqIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-300"
-                viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.584l3.71-4.353a.75.75 0 111.14.976l-4.25 5a.75.75 0 01-1.14 0l-4.25-5a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd" />
-            </svg>
-        </h2>
-        <div class="faq-content mt-2">
-            <div class="mb-4">
-                <h3 class="font-semibold text-text-color">1. Apa itu Dorking?</h3>
-                <p class="text-gray-400">Dorking adalah metode pencarian tingkat lanjut yang menggunakan query spesifik untuk
-                    menemukan informasi tersembunyi di internet. Teknologi ini sering digunakan oleh profesional keamanan untuk
-                    mengidentifikasi celah keamanan dan melindungi data.</p>
-            </div>
-            <div class="mb-4">
-                <h3 class="font-semibold text-text-color">2. Bagaimana cara menggunakan aplikasi ini?</h3>
-                <p class="text-gray-400">
-                    - Masukkan kata kunci dengan presisi tinggi untuk hasil pencarian yang optimal.<br>
-                    - Pilih negara dan mesin pencari yang sesuai dengan kebutuhan Anda.<br>
-                    - Tentukan kategori dan jenis file untuk mempersempit hasil pencarian.<br>
-                    - Aktifkan <strong>Mode VIV</strong> untuk pencarian yang sepenuhnya anonim dan tidak terdeteksi.<br>
-                    - Klik tombol <strong>"Cari"</strong> untuk memulai pencarian. Algoritma kami akan melakukan proses dengan
-                    kecepatan dan akurasi tinggi.
-                </p>
-            </div>
-
-            <!-- Hit Counter -->
-            <div class="mt-4 flex justify-center">
-                <img src="https://hitwebcounter.com/counter/counter.php?page=17519097&style=0008&nbdigits=5&type=page&initCount=0"
-                    alt="Visit Counter" title="Counter Widget" class="w-20">
-            </div>
-        </div>
-
-    </div>
+    <!-- Elemen untuk Grafik -->
+    <canvas id="priceChart" width="400" height="200"></canvas>
 
     <script>
-        // Theme Toggle Functionality
-        const themeToggle = document.getElementById('themeToggle');
-        const rootElement = document.body; // karena data-theme diterapkan pada body
-
-        // Inisialisasi tema berdasarkan localStorage atau default
-        if (localStorage.getItem('theme') === 'light') {
-            rootElement.setAttribute('data-theme', 'light');
-            themeToggle.checked = true;
-        } else {
-            rootElement.setAttribute('data-theme', 'dark');
-            themeToggle.checked = false;
+        // Fungsi untuk mengambil data koin dari API
+        async function fetchCoinData() {
+            const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets';
+            const response = await fetch(`${apiUrl}?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false`);
+            const data = await response.json();
+            return data;
         }
 
-        themeToggle.addEventListener('change', () => {
-            if (themeToggle.checked) {
-                rootElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-            } else {
-                rootElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        });
-
-        // FAQ Toggle Functionality
-        function toggleFAQ() {
-            const faq = document.querySelector('.faq-content');
-            const faqIcon = document.getElementById('faqIcon');
-            faq.classList.toggle('show');
-            faqIcon.classList.toggle('rotate-180');
-        }
-
-        // Ripple Effect on Buttons
-        const buttons = document.querySelectorAll('.ripple');
-        buttons.forEach(button => {
-            button.addEventListener('click', function (e) {
-                const circle = document.createElement('span');
-                const diameter = Math.max(this.clientWidth, this.clientHeight);
-                const radius = diameter / 2;
-
-                circle.style.width = circle.style.height = `${diameter}px`;
-                circle.style.left = `${e.clientX - this.getBoundingClientRect().left - radius}px`;
-                circle.style.top = `${e.clientY - this.getBoundingClientRect().top - radius}px`;
-                circle.classList.add('absolute', 'bg-white', 'opacity-25', 'rounded-full', 'animate-ripple');
-
-                const ripple = this.getElementsByClassName('ripple-effect')[0];
-
-                if (ripple) {
-                    ripple.remove();
+        // Fungsi untuk mengambil data harga per jam dari API
+        async function fetchHourlyData(coinId) {
+            const apiUrl = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`;
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                // Log data untuk memeriksa struktur
+                console.log(data);
+                // Periksa apakah data dan prices ada sebelum melanjutkan
+                if (data && data.prices) {
+                    return data.prices;
+                } else {
+                    throw new Error('Data tidak ditemukan atau struktur data salah');
                 }
+            } catch (error) {
+                console.error('Error fetching hourly data:', error);
+                return null;  // Jika terjadi error, kembalikan null
+            }
+        }
 
-                this.appendChild(circle);
+        // Fungsi untuk memfilter koin dengan peluang scalping yang tinggi
+        function filterForScalping(data) {
+            return data.filter(coin => {
+                const priceChange = coin.price_change_percentage_24h;
+                const volume = coin.total_volume;
+                // Kriteria untuk scalping: perubahan harga antara 3%-5% dan volume perdagangan lebih besar dari $50 juta
+                return priceChange >= 3 && priceChange <= 5 && volume >= 50000000;
             });
-        });
-
-        // Daftar Jenis File Berdasarkan Kategori
-        const fileTypesByCategory = {
-            documents: [
-                { value: 'pdf', label: 'PDF (.pdf)' },
-                { value: 'doc', label: 'Dokumen Word (.doc)' },
-                { value: 'docx', label: 'Dokumen Word (.docx)' },
-                { value: 'txt', label: 'Teks (.txt)' },
-                { value: 'xlsx', label: 'Spreadsheet Excel (.xlsx)' },
-                { value: 'ppt', label: 'Presentasi PowerPoint (.ppt)' },
-                { value: 'pptx', label: 'Presentasi PowerPoint (.pptx)' },
-                { value: 'odt', label: 'Dokumen OpenDocument (.odt)' },
-                { value: 'rtf', label: 'Rich Text Format (.rtf)' },
-            ],
-            media: [
-                { value: 'mp4', label: 'Video MP4 (.mp4)' },
-                { value: 'jpg', label: 'Gambar JPEG (.jpg)' },
-                { value: 'png', label: 'Gambar PNG (.png)' },
-                { value: 'gif', label: 'Gambar GIF (.gif)' },
-                { value: 'mp3', label: 'Audio MP3 (.mp3)' },
-                { value: 'avi', label: 'Video AVI (.avi)' },
-                { value: 'mkv', label: 'Video MKV (.mkv)' },
-                { value: 'mov', label: 'Video MOV (.mov)' },
-                { value: 'flv', label: 'Video FLV (.flv)' },
-            ],
-            database: [
-                { value: 'sql', label: 'Database SQL (.sql)' },
-                { value: 'db', label: 'Database (.db)' },
-                { value: 'mdb', label: 'Database Microsoft Access (.mdb)' },
-                { value: 'accdb', label: 'Database Microsoft Access (.accdb)' },
-                { value: 'sqlite', label: 'SQLite Database (.sqlite)' },
-                { value: 'bak', label: 'Database Backup (.bak)' },
-            ],
-            scripts: [
-                { value: 'php', label: 'Skrip PHP (.php)' },
-                { value: 'js', label: 'JavaScript (.js)' },
-                { value: 'py', label: 'Python (.py)' },
-                { value: 'rb', label: 'Ruby (.rb)' },
-                { value: 'sh', label: 'Shell Script (.sh)' },
-                { value: 'pl', label: 'Perl (.pl)' },
-                { value: 'bat', label: 'Batch File (.bat)' },
-                { value: 'vbs', label: 'VBScript (.vbs)' },
-            ],
-            images: [
-                { value: 'jpg', label: 'Gambar JPEG (.jpg)' },
-                { value: 'png', label: 'Gambar PNG (.png)' },
-                { value: 'gif', label: 'Gambar GIF (.gif)' },
-                { value: 'bmp', label: 'Gambar BMP (.bmp)' },
-                { value: 'svg', label: 'Gambar SVG (.svg)' },
-                { value: 'tiff', label: 'Gambar TIFF (.tiff)' },
-                { value: 'webp', label: 'Gambar WebP (.webp)' },
-                { value: 'ico', label: 'Icon (.ico)' },
-            ],
-            archives: [
-                { value: 'zip', label: 'Arsip ZIP (.zip)' },
-                { value: 'rar', label: 'Arsip RAR (.rar)' },
-                { value: 'tar', label: 'Arsip TAR (.tar)' },
-                { value: 'gz', label: 'Arsip GZ (.gz)' },
-                { value: '7z', label: 'Arsip 7Z (.7z)' },
-                { value: 'bz2', label: 'Arsip BZ2 (.bz2)' },
-                { value: 'iso', label: 'Image ISO (.iso)' },
-                { value: 'cab', label: 'Cabinet File (.cab)' },
-            ],
-        };
-
-        // Dorking Options
-        const dorkingsByCategory = {
-            documents: ['intitle:"index of" "confidential" "financial report" filetype:xls OR filetype:pdf -html'],
-            media: ['filetype:mp4 "video"'],
-            database: ['filetype:sql "backup"'],
-            scripts: ['filetype:php "configuration"'],
-            images: ['"sensitive data" filetype:jpg'],
-            archives: ['"index of" "backup.zip"'],
-        };
-
-        // Event Listener untuk Kategori File
-        document.getElementById('category').addEventListener('change', function () {
-            const selectedCategory = this.value;
-            const fileTypeSection = document.getElementById('fileTypeSection');
-            const fileTypeOptions = document.getElementById('fileTypeOptions');
-
-            if (selectedCategory && fileTypesByCategory[selectedCategory]) {
-                // Tampilkan bagian Jenis File
-                fileTypeSection.classList.remove('hidden');
-
-                // Reset opsi jenis file
-                fileTypeOptions.innerHTML = '';
-
-                // Menambahkan opsi jenis file berdasarkan kategori yang dipilih
-                fileTypesByCategory[selectedCategory].forEach(file => {
-                    const label = document.createElement('label');
-                    label.innerHTML = `<input type="checkbox" name="fileType" value="${file.value}" class="form-checkbox text-primary-color rounded"> ${file.label}`;
-                    fileTypeOptions.appendChild(label);
-                });
-            } else {
-                // Sembunyikan bagian Jenis File jika tidak ada kategori yang dipilih atau kategori tidak memiliki jenis file
-                fileTypeSection.classList.add('hidden');
-                fileTypeOptions.innerHTML = '';
-            }
-
-            // Reset Dorking Options berdasarkan kategori
-            const dorkingOptionsDiv = document.getElementById('dorkingOptions');
-            dorkingOptionsDiv.innerHTML = ''; // Reset pilihan dorking
-
-            if (selectedCategory && dorkingsByCategory[selectedCategory]) {
-                dorkingsByCategory[selectedCategory].forEach(dork => {
-                    const label = document.createElement('label');
-                    label.className = "text-text-color inline-flex items-center mb-2"; // Warna untuk label dorking
-                    label.innerHTML = `<input type="checkbox" name="dorkQuery" value="${dork}" class="form-checkbox text-primary-color rounded"> <span class="ml-2">${dork}</span>`;
-                    dorkingOptionsDiv.appendChild(label);
-                });
-            }
-        });
-
-        // Fungsi untuk Membangun URL Pencarian dengan Mode VIV
-        function buildSearchURL(engine, query, country, vivEnabled, fileTypes) {
-            let searchURL = '';
-            let finalQuery = query;
-            const glParameter = country ? `&gl=${country}` : '';
-
-            // Menambahkan jenis file ke query jika ada
-            if (fileTypes.length > 0) {
-                const fileTypeQuery = fileTypes.map(type => `filetype:${type}`).join(' OR ');
-                finalQuery += ` (${fileTypeQuery})`;
-            }
-
-            const encodedFinalQuery = encodeURIComponent(finalQuery);
-
-            switch (engine) {
-                case 'google':
-                    searchURL = `https://www.google.com/search?q=${encodedFinalQuery}`;
-                    if (vivEnabled) {
-                        searchURL += `&safe=off&hl=en&gl=us`; // Menonaktifkan SafeSearch dan set gl ke US
-                    }
-                    break;
-                case 'bing':
-                    searchURL = `https://www.bing.com/search?q=${encodedFinalQuery}`;
-                    if (vivEnabled) {
-                        searchURL += `&safe=Off&setmkt=en-US`; // Menonaktifkan SafeSearch dan set market ke US
-                    }
-                    break;
-                case 'yahoo':
-                    searchURL = `https://search.yahoo.com/search?p=${encodedFinalQuery}`;
-                    if (vivEnabled) {
-                        searchURL += `&toggle=1&cop=mss&ei=UTF-8&fr=crmas&p=us`; // Menonaktifkan SafeSearch dan set region ke US
-                    }
-                    break;
-                case 'duckduckgo':
-                    searchURL = `https://duckduckgo.com/?q=${encodedFinalQuery}`;
-                    if (vivEnabled) {
-                        searchURL += `&kp=-1&kl=us-en`; // Menonaktifkan SafeSearch dan set region ke US
-                    }
-                    break;
-                case 'yandex':
-                    searchURL = `https://yandex.com/search/?text=${encodedFinalQuery}`;
-                    if (vivEnabled) {
-                        searchURL += `&safe=off&geo=213`; // Menonaktifkan SafeSearch dan set geo ke Moskow (213)
-                    }
-                    searchURL += `&safese=d`; // Menambahkan parameter untuk menonaktifkan Safe Search
-                    break;
-                default:
-                    break;
-            }
-
-            // Menambahkan parameter negara jika belum ditambahkan
-            if (!searchURL.includes('&gl=') && glParameter) {
-                searchURL += glParameter;
-            }
-
-            return searchURL;
         }
 
-        // Fungsi untuk Membuka URL dengan Penundaan
-        function openWithDelay(url, delay) {
-            setTimeout(() => {
-                window.open(url, '_blank');
-            }, delay);
-        }
-
-        // Fungsi untuk Mengirim Data ke Backend
-        function sendToTelegram(event) {
-            event.preventDefault();
-
-            // Menampilkan indikator loading
-            const loading = document.getElementById('loading');
-            loading.classList.remove('hidden');
-
-            // Mendapatkan data dari form
-            let formData = new FormData(document.getElementById('searchForm'));
-
-            // Mendapatkan kategori dan dorking yang dipilih
-            const category = document.getElementById('category').value;
-            const selectedDorks = Array.from(document.querySelectorAll('#dorkingOptions input:checked')).map(input => input.value);
-            formData.append('dorkQuery', selectedDorks.join(' OR '));
-
-            // Mendapatkan semua mesin pencari yang dipilih
-            const searchEngineCheckboxes = document.querySelectorAll('input[name="searchEngine"]:checked');
-            const selectedEngines = Array.from(searchEngineCheckboxes).map(checkbox => checkbox.value);
-            formData.append('searchEngine', selectedEngines);
-
-            // Mendapatkan semua jenis file yang dipilih
-            const fileTypeCheckboxes = document.querySelectorAll('input[name="fileType"]:checked');
-            const selectedFileTypes = Array.from(fileTypeCheckboxes).map(checkbox => checkbox.value);
-            formData.append('fileType', selectedFileTypes);
-
-            // Mendapatkan status Mode VIV
-            const vivEnabled = document.getElementById('vivMode').checked;
-            formData.append('vivMode', vivEnabled);
-
-            // Mendapatkan negara
-            const country = document.getElementById('country').value;
-            formData.append('country', country);
-
-            // Mendapatkan kata kunci
-            const keywords = document.getElementById('keywords').value.trim();
-            formData.append('keywords', keywords);
-
-            // Kirim data ke backend
-            fetch('send_to_telegram.php', { // Pastikan file PHP ini berada di lokasi yang sama atau sesuaikan path-nya
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    loading.classList.add('hidden');
-                    if (data.ok) {
-                        alert('Pencarian berhasil dikirim ke Telegram!');
-                    } else {
-                        alert('Gagal mengirim pencarian ke Telegram.');
-                        console.error(data);
-                    }
-                })
-                .catch(error => {
-                    loading.classList.add('hidden');
-                    alert('Terjadi kesalahan saat mengirim data.');
-                    console.error('Error:', error);
-                });
-
-            // Lanjutkan dengan fungsi pencarian seperti biasa
-            handleSearchFormSubmission();
-        }
-
-        // Fungsi untuk Menangani Pencarian setelah Data Dikirim
-        function handleSearchFormSubmission() {
-            // Mendapatkan kata kunci dan sanitasi input
-            let keywords = document.getElementById('keywords').value.trim();
-            if (keywords === "") {
-                alert("Silakan masukkan kata kunci.");
-                document.getElementById('loading').classList.add('hidden');
+        // Fungsi untuk membuat grafik harga per jam
+        function createPriceChart(hourlyData) {
+            if (!hourlyData || hourlyData.length === 0) {
+                alert('Tidak ada data harga per jam untuk ditampilkan.');
                 return;
             }
 
-            // Mendapatkan negara
-            const country = document.getElementById('country').value;
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            const labels = hourlyData.map(item => new Date(item[0]).toLocaleTimeString());
+            const prices = hourlyData.map(item => item[1]);
 
-            // Mendapatkan semua mesin pencari yang dipilih
-            const searchEngineCheckboxes = document.querySelectorAll('input[name="searchEngine"]:checked');
-            const selectedEngines = Array.from(searchEngineCheckboxes).map(checkbox => checkbox.value);
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Harga per Jam (USD)',
+                        data: prices,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Harga (USD)'
+                            },
+                            ticks: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
-            if (selectedEngines.length === 0) {
-                alert("Silakan pilih minimal satu mesin pencari.");
-                document.getElementById('loading').classList.add('hidden');
+        // Fungsi untuk menampilkan koin yang sudah difilter ke dalam tabel
+        function displayCoins(filteredData) {
+            const tableBody = document.getElementById("coin-list");
+            // Clear previous data
+            tableBody.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                const noDataRow = document.createElement('tr');
+                noDataRow.innerHTML = `<td colspan="6">Tidak ada koin yang memenuhi kriteria untuk scalping dengan peluang 80-90%.</td>`;
+                tableBody.appendChild(noDataRow);
                 return;
             }
 
-            // Mendapatkan kategori dan dorking yang dipilih
-            const category = document.getElementById('category').value;
-            const selectedDorks = Array.from(document.querySelectorAll('#dorkingOptions input:checked')).map(input => input.value);
-            const dorkQuery = selectedDorks.length > 0 ? selectedDorks.join(' OR ') : '';
+            filteredData.forEach(coin => {
+                const row = document.createElement('tr');
+                row.className = coin.price_change_percentage_24h >= 3 ? 'recommended' : '';
+                row.innerHTML = `
+                    <td><img src="${coin.image}" alt="${coin.name}"> ${coin.name}</td>
+                    <td>${coin.symbol.toUpperCase()}</td>
+                    <td>$${coin.current_price.toFixed(2)}</td>
+                    <td>${coin.price_change_percentage_24h.toFixed(2)}%</td>
+                    <td>80-90%</td>
+                    <td>${coin.price_change_percentage_24h >= 3 ? 'Direkomendasikan' : 'Tidak Direkomendasikan'}</td>
+                `;
+                tableBody.appendChild(row);
 
-            // Menyusun query awal
-            let searchQuery = keywords + ' ' + dorkQuery;
-
-            // Mendapatkan semua jenis file yang dipilih
-            const fileTypeCheckboxes = document.querySelectorAll('input[name="fileType"]:checked');
-            const selectedFileTypes = Array.from(fileTypeCheckboxes).map(checkbox => checkbox.value);
-
-            // Mendapatkan status Mode VIV
-            const vivEnabled = document.getElementById('vivMode').checked;
-
-            // Membangun dan membuka URL pencarian untuk setiap mesin pencari yang dipilih dengan penundaan
-            selectedEngines.forEach((engine, index) => {
-                const searchURL = buildSearchURL(engine, searchQuery, country, vivEnabled, selectedFileTypes);
-                // Menambahkan penundaan 500ms antara setiap pembukaan tab
-                openWithDelay(searchURL, index * 500);
+                // Ambil data per jam untuk grafik
+                fetchHourlyData(coin.id).then(hourlyData => {
+                    if (hourlyData) {
+                        createPriceChart(hourlyData);
+                    }
+                });
             });
-
-            // Menyembunyikan indikator loading setelah semua tab dibuka
-            const totalDelay = selectedEngines.length * 500;
-            setTimeout(() => {
-                document.getElementById('loading').classList.add('hidden');
-            }, totalDelay + 500);
         }
+
+        // Menjalankan fungsi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', async () => {
+            const coinData = await fetchCoinData();  // Mengambil data koin
+            const filteredCoins = filterForScalping(coinData);  // Memfilter koin untuk scalping
+            displayCoins(filteredCoins);  // Menampilkan koin yang memenuhi kriteria
+        });
     </script>
 </body>
-
 </html>
