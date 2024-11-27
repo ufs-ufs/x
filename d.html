@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekomendasi Scalping Crypto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #181818;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #2c2c2c;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        th {
+            background-color: #333;
+            color: #fff;
+        }
+        tr:hover {
+            background-color: #444;
+        }
+        img {
+            width: 30px;
+            height: 30px;
+        }
+        .recommended {
+            background-color: #4CAF50;
+            font-weight: bold;
+            color: white;
+        }
+        .not-recommended {
+            background-color: #f44336;
+            font-weight: bold;
+            color: white;
+        }
+        canvas {
+            margin-top: 20px;
+            background-color: #181818;
+        }
+        p {
+            text-align: center;
+            color: #bbb;
+        }
+    </style>
+    <!-- Tambahkan Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Rekomendasi Scalping Crypto</h1>
+    <p>Halaman ini menampilkan analisis koin-koin crypto dengan peluang scalping terbaik berdasarkan indikator teknikal, perubahan harga, dan volume perdagangan.</p>
+
+    <table id="coin-table">
+        <thead>
+            <tr>
+                <th>Nama</th>
+                <th>Simbol</th>
+                <th>Harga (USD)</th>
+                <th>Perubahan 24 Jam (%)</th>
+                <th>Peluang Scalping (%)</th>
+                <th>Rekomendasi</th>
+            </tr>
+        </thead>
+        <tbody id="coin-list">
+            <!-- Data akan dimasukkan di sini menggunakan JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Elemen untuk Grafik -->
+    <canvas id="priceChart" width="400" height="200"></canvas>
+
+    <script>
+        // Fungsi untuk mengambil data koin dari API
+        async function fetchCoinData() {
+            try {
+                const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets';
+                const response = await fetch(`${apiUrl}?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false`);
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data koin.');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching coin data:', error);
+                alert('Gagal mengambil data koin.');
+                return [];
+            }
+        }
+
+        // Fungsi untuk mengambil data harga per jam dari API
+        async function fetchHourlyData(coinId) {
+            const apiUrl = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`;
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                // Log data untuk memeriksa struktur
+                console.log(data);
+                // Periksa apakah data dan prices ada sebelum melanjutkan
+                if (data && data.prices) {
+                    return data.prices;
+                } else {
+                    throw new Error('Data tidak ditemukan atau struktur data salah');
+                }
+            } catch (error) {
+                console.error('Error fetching hourly data:', error);
+                return null;  // Jika terjadi error, kembalikan null
+            }
+        }
+
+        // Fungsi untuk memfilter koin dengan peluang scalping yang tinggi
+        function filterForScalping(data) {
+            return data.filter(coin => {
+                const priceChange = coin.price_change_percentage_24h;
+                const volume = coin.total_volume;
+                // Kriteria untuk scalping: perubahan harga antara 3%-5% dan volume perdagangan lebih besar dari $50 juta
+                return priceChange >= 3 && priceChange <= 5 && volume >= 50000000;
+            });
+        }
+
+        // Fungsi untuk membuat grafik harga per jam
+        function createPriceChart(hourlyData) {
+            if (!hourlyData || hourlyData.length === 0) {
+                alert('Tidak ada data harga per jam untuk ditampilkan.');
+                return;
+            }
+
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            const labels = hourlyData.map(item => new Date(item[0]).toLocaleTimeString());
+            const prices = hourlyData.map(item => item[1]);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Harga per Jam (USD)',
+                        data: prices,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.1
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fungsi untuk menampilkan data koin dalam tabel
+        function displayCoins(coins) {
+            const coinList = document.getElementById('coin-list');
+            coinList.innerHTML = '';  // Kosongkan isi tabel
+
+            coins.forEach(coin => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${coin.name}</td>
+                    <td>${coin.symbol.toUpperCase()}</td>
+                    <td>${coin.current_price}</td>
+                    <td>${coin.price_change_percentage_24h.toFixed(2)}%</td>
+                    <td>${coin.market_cap_change_percentage_24h.toFixed(2)}%</td>
+                    <td class="${coin.price_change_percentage_24h >= 3 && coin.price_change_percentage_24h <= 5 ? 'recommended' : 'not-recommended'}">
+                        ${coin.price_change_percentage_24h >= 3 && coin.price_change_percentage_24h <= 5 ? 'Rekomendasi' : 'Tidak Rekomendasi'}
+                    </td>
+                `;
+                coinList.appendChild(row);
+            });
+        }
+
+        // Menjalankan fungsi saat halaman dimuat
+        window.onload = async function() {
+            const coinData = await fetchCoinData();
+            const filteredCoins = filterForScalping(coinData);
+            displayCoins(filteredCoins);
+        };
+    </script>
+</body>
+</html>
