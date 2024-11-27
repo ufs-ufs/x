@@ -67,10 +67,13 @@
         .btn:hover {
             background-color: #0056b3;
         }
-        #loadingSpinner {
-            display: none;
-            text-align: center;
-            padding: 20px;
+        .input-container {
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            padding: 10px;
+            width: 100%;
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -82,10 +85,14 @@
     </header>
 
     <div class="container">
-        <!-- Indikator Loading -->
-        <div id="loadingSpinner">
-            <img src="https://cdnjs.cloudflare.com/ajax/libs/loading.io/2.0.0/loader.gif" alt="Loading..." />
-            <p>Memuat data...</p>
+        <div class="input-container">
+            <input type="text" id="searchInput" placeholder="Cari Koin..." onkeyup="searchCoins()">
+            <select id="filterChange" onchange="filterByChange()">
+                <option value="1">Perubahan > 1%</option>
+                <option value="5">Perubahan > 5%</option>
+                <option value="10">Perubahan > 10%</option>
+                <option value="all">Semua Koin</option>
+            </select>
         </div>
 
         <div id="coin-list-container">
@@ -102,29 +109,21 @@
     </div>
 
     <script>
-        // URL API untuk mengambil data harga koin
         const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,binancecoin,xrp,dogecoin,usd-coin,cardano,avalanche-2,tron,toncoin,xlm,shiba-inu,polkadot,chainlink,bitcoin-cash,sui,near-protocol,pepecoin,litecoin,uniswap,aptos,internet-computer,hbar,polkadot-2,ethereum-classic,tao,rendervision,arbitrum,fet,vet,tia,fil,omni,stx,cosmos,bonk,wi-fi,ftm,aave,injected,optimism,imx,sei,algo,the-graph,floki,fdusd,theta,rune,ena,wld,ray,pyth,mkr,ldo,sand,jup,flow,ar,gala,xtz,strk,btccoin,eos,jasmy,qnt,axs,mana,beamx,kaia,pnut,egld,neo,dydx,ape,xec,mina,nexo,pendle,ens,not,chz,cfx,cake,iota,ordi,snx,w,axl,neiro,ckb,rose,eigen,lunc,super,zk,blur,gmt,bome,comp,crv,astr,ronin,ksm,kava,tfuel,paxg,hot,1inch,1000sats,tusd,zro,en';
 
         let coinsData = [];
+        let filteredCoins = [];
 
         // Ambil data koin dari API
         function getCoinData() {
-            // Tampilkan indikator loading
-            document.getElementById('loadingSpinner').style.display = 'block';
-            document.getElementById('coin-list-container').style.display = 'none';
-
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
-                    coinsData = data;
-                    let sortedCoins = sortCoinsByChange(data);
-                    let recommendedCoins = getRecommendedCoins(sortedCoins);
-                    displayCoins(recommendedCoins);
+                    coinsData = sortCoinsByChange(data);
+                    filteredCoins = coinsData;
+                    displayCoins(filteredCoins);
                 })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                    document.getElementById('loadingSpinner').innerHTML = '<p>Gagal memuat data, coba lagi nanti.</p>';
-                });
+                .catch(error => console.error('Error fetching data:', error));
         }
 
         // Sortir koin berdasarkan perubahan harga dalam 24 jam
@@ -132,25 +131,10 @@
             return coins.sort((a, b) => Math.abs(b.price_change_percentage_24h) - Math.abs(a.price_change_percentage_24h));
         }
 
-        // Ambil koin yang memiliki perubahan lebih dari 1% dan batasi hanya 3-5 koin
-        function getRecommendedCoins(coins) {
-            let recommendedCoins = [];
-            for (let i = 0; i < coins.length; i++) {
-                if (Math.abs(coins[i].price_change_percentage_24h) > 1) {
-                    recommendedCoins.push(coins[i]);
-                }
-                if (recommendedCoins.length >= 5) {
-                    break;
-                }
-            }
-            return recommendedCoins;
-        }
-
-        // Tampilkan koin yang direkomendasikan
+        // Menampilkan koin yang direkomendasikan
         function displayCoins(coins) {
             const coinList = document.getElementById('coin-list');
             coinList.innerHTML = '';
-
             coins.forEach(coin => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('coin-item');
@@ -170,20 +154,12 @@
                 `;
                 coinList.appendChild(listItem);
             });
-
-            // Sembunyikan indikator loading dan tampilkan daftar koin
-            document.getElementById('loadingSpinner').style.display = 'none';
-            document.getElementById('coin-list-container').style.display = 'block';
         }
 
         // Fungsi untuk melihat grafik harga koin
         function viewChart(coinId) {
-            // Tampilkan indikator loading
-            document.getElementById('loadingSpinner').style.display = 'block';
-            document.getElementById('chart-container').style.display = 'none';
-            
             const chartApiUrl = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1`;
-
+            
             fetch(chartApiUrl)
                 .then(response => response.json())
                 .then(data => {
@@ -201,72 +177,106 @@
         function displayChart(times, prices, highPrices, lowPrices) {
             const ctx = document.getElementById('priceChart').getContext('2d');
             
-            // Buat grafik baru atau perbarui yang lama
-            if (window.priceChart) {
-                window.priceChart.data.labels = times;
-                window.priceChart.data.datasets[0].data = prices;
-                window.priceChart.data.datasets[1].data = highPrices;
-                window.priceChart.data.datasets[2].data = lowPrices;
-                window.priceChart.update();
-            } else {
-                window.priceChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: times,
-                        datasets: [{
-                            label: 'Harga (USD)',
-                            data: prices,
-                            borderColor: 'rgb(75, 192, 192)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            fill: true,
-                        }, {
-                            label: 'Harga Tertinggi',
-                            data: highPrices,
-                            borderColor: 'rgb(255, 99, 132)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            fill: false,
-                        }, {
-                            label: 'Harga Terendah',
-                            data: lowPrices,
-                            borderColor: 'rgb(153, 102, 255)',
-                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                            fill: false,
-                        }],
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: times,
+                    datasets: [{
+                        label: 'Harga (USD)',
+                        data: prices,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                    }, {
+                        label: 'Harga Tertinggi',
+                        data: highPrices,
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        fill: false,
+                    }, {
+                        label: 'Harga Terendah',
+                        data: lowPrices,
+                        borderColor: 'rgb(153, 102, 255)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        fill: false,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Grafik Harga Koin per Jam',
+                        },
                     },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Grafik Harga Koin per Jam',
+                    scales: {
+                        x: {
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 6,
                             },
                         },
-                        scales: {
-                            x: {
-                                ticks: {
-                                    autoSkip: true,
-                                    maxTicksLimit: 6,
-                                },
-                            },
-                        },
-                    }
-                });
-            }
-
-            // Sembunyikan indikator loading dan tampilkan grafik
-            document.getElementById('loadingSpinner').style.display = 'none';
+                    },
+                }
+            });
+            
+            document.getElementById('coin-list-container').style.display = 'none';
             document.getElementById('chart-container').style.display = 'block';
         }
 
         // Kembali ke daftar koin
-        document.getElementById('backButton').addEventListener('click', () => {
+        document.getElementById('backButton').onclick = function () {
             document.getElementById('coin-list-container').style.display = 'block';
             document.getElementById('chart-container').style.display = 'none';
-        });
+        };
 
-        // Inisialisasi aplikasi
+        // Pencarian koin
+        function searchCoins() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const coinItems = document.querySelectorAll('.coin-item');
+            
+            coinItems.forEach(item => {
+                const coinName = item.querySelector('span').innerText.toLowerCase();
+                if (coinName.includes(searchQuery)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Filter berdasarkan perubahan harga
+        function filterByChange() {
+            const filterValue = document.getElementById('filterChange').value;
+            let coinsToDisplay = coinsData;
+
+            if (filterValue !== 'all') {
+                const minChange = parseFloat(filterValue);
+                coinsToDisplay = coinsData.filter(coin => Math.abs(coin.price_change_percentage_24h) >= minChange);
+            }
+
+            displayCoins(coinsToDisplay);
+        }
+
+        // Cek pemberitahuan jika harga koin mencapai target
+        function checkPriceAlert(coin) {
+            const targetPrice = 50000; // Misalnya target harga Bitcoin adalah 50.000 USD
+            if (coin.current_price >= targetPrice) {
+                if (Notification.permission === "granted") {
+                    new Notification(`${coin.name} telah mencapai target harga!`, {
+                        body: `Harga saat ini: ${coin.current_price} USD`,
+                    });
+                }
+            }
+        }
+
+        // Ambil data koin pada saat halaman dimuat
         window.onload = getCoinData;
-    </script>
 
+        // Meminta izin untuk notifikasi
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+    </script>
 </body>
 </html>
