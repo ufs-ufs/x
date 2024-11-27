@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekomendasi Scalping Crypto</title>
     <style>
-        /* Same CSS as before */
         body {
             font-family: Arial, sans-serif;
             background-color: #121212;
@@ -125,17 +124,12 @@
             return data.prices || [];
         }
 
-        function calculateScalpingOpportunity(coin, hourlyData) {
-            // 1. Volatilitas (perubahan harga per jam)
-            const priceChange = (hourlyData[hourlyData.length - 1][1] - hourlyData[0][1]) / hourlyData[0][1] * 100; // Persentase perubahan harga dalam satu jam
-
-            // 2. Volume perdagangan (menggunakan volume 24 jam untuk indikasi likuiditas)
-            const volume = coin.total_volume;
-            const volumeScore = Math.log(volume / 1000000) * 10; // Membuat penilaian volume (logaritma untuk skala yang lebih nyaman)
-
-            // 3. Menggabungkan volatilitas dan volume ke dalam skor scalping
-            const scalpingScore = (priceChange + volumeScore) / 2; // Menggabungkan keduanya untuk skor scalping
-            return Math.min(100, Math.max(0, scalpingScore)); // Menjaga agar hasil tidak lebih dari 100%
+        function calculateScalpingOpportunity(coin) {
+            // Implementing a simple logic for scalping opportunity (you can expand this logic further)
+            // Example: More volatile coins with higher volume are better for scalping
+            const volatility = coin.price_change_percentage_24h; // 24h volatility
+            const volume = coin.total_volume; // Trading volume
+            return Math.min(100, Math.max(0, volatility * 0.2 + Math.log(volume / 1000000) * 15)); // Just a rough estimation formula
         }
 
         function filterForScalping(data) {
@@ -179,10 +173,8 @@
             const coinList = document.getElementById('coin-list');
             coinList.innerHTML = '';
 
-            filteredCoins.forEach(async (coin) => {
-                const hourlyData = await fetchHourlyData(coin.id);
-                const scalpingOpportunity = calculateScalpingOpportunity(coin, hourlyData);
-                
+            filteredCoins.forEach(coin => {
+                const scalpingOpportunity = calculateScalpingOpportunity(coin);
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${coin.name}</td>
