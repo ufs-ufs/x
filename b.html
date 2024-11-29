@@ -1,258 +1,341 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cryptocurrency Scalping App</title>
+    <title>Dashboard Harga Koin Kripto - Analisis Scalping</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f8f8;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
         }
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
+            width: 80%;
+            margin: 20px auto;
         }
-        h1 {
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        .coin-name {
+            font-weight: bold;
+        }
+        .price {
+            color: green;
+        }
+        .loading {
             text-align: center;
+            font-size: 20px;
             color: #333;
-            font-size: 24px;
         }
-        .filters {
+        .recommendation-table {
+            margin-top: 20px;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+        .recommendation-table th, .recommendation-table td {
+            padding: 10px;
             text-align: center;
+        }
+        .recommendation-table th {
+            background-color: #444;
+            color: white;
+        }
+        .filter-container {
             margin-bottom: 20px;
         }
-        .filter-button {
-            padding: 8px 15px;
-            margin: 5px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
-        }
-        .filter-button:hover {
-            background-color: #45a049;
-        }
-        .crypto-list {
+        .filter-row {
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
-            gap: 10px;
-        }
-        .crypto-item {
-            background-color: white;
-            margin: 10px;
-            padding: 15px;
-            width: 22%;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            text-align: center;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .crypto-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .highlight {
-            border: 2px solid red;
-        }
-        .crypto-name {
-            font-size: 16px;
-            font-weight: bold;
             margin-bottom: 10px;
         }
-        .crypto-price {
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-        .crypto-change {
-            font-size: 12px;
-            color: #777;
-        }
-        .buy-sell-btn {
-            padding: 8px 15px;
-            margin-top: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
-        }
-        .buy-btn {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .sell-btn {
-            background-color: #f44336;
-            color: white;
-        }
-        .buy-btn:hover {
-            background-color: #45a049;
-        }
-        .sell-btn:hover {
-            background-color: #e53935;
+        .filter-container select {
+            width: 150px;
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Dashboard Harga Koin Kripto - Analisis Scalping</h1>
+    </header>
 
-<div class="container">
-    <h1>Cryptocurrency Scalping App</h1>
-    <div class="filters">
-        <button class="filter-button" id="top-gainers">Top Gainers</button>
-        <button class="filter-button" id="top-losers">Top Losers</button>
+    <div class="container">
+        <!-- Dropdown API Selector -->
+        <div class="filter-container">
+            <label for="apiSelector">Pilih API: </label>
+            <select id="apiSelector">
+                <option value="coingecko">CoinGecko</option>
+                <option value="binance">Binance</option>
+                <option value="kraken">Kraken</option>
+            </select>
+        </div>
+
+        <!-- Tabel Koin Rekomendasi -->
+        <h2>3 Koin Rekomendasi untuk Scalping</h2>
+        <table class="recommendation-table">
+            <thead>
+                <tr>
+                    <th>Nama Koin</th>
+                    <th>Harga (IDR)</th>
+                    <th>Rasio Risk/Reward</th>
+                    <th>Keuntungan Potensial</th>
+                </tr>
+            </thead>
+            <tbody id="recommendationTable">
+                <!-- Koin rekomendasi akan dimasukkan di sini -->
+            </tbody>
+        </table>
+
+        <!-- Filter berdasarkan kolom -->
+        <h2>Daftar Koin dan Analisis Scalping</h2>
+        <div id="loading" class="loading">Memuat data...</div>
+        <table id="coinTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Nama Koin</th>
+                    <th>
+                        Harga (IDR) 
+                        <select id="priceFilter" onchange="sortTable('price')">
+                            <option value="asc">Harga Terendah ke Tertinggi</option>
+                            <option value="desc">Harga Tertinggi ke Terendah</option>
+                        </select>
+                    </th>
+                    <th>
+                        Volume 24 Jam 
+                        <select id="volumeFilter" onchange="sortTable('volume')">
+                            <option value="asc">Volume Terendah</option>
+                            <option value="desc">Volume Tertinggi</option>
+                        </select>
+                    </th>
+                    <th>
+                        Perubahan Harga 24 Jam (%) 
+                        <select id="priceChangeFilter" onchange="sortTable('priceChange')">
+                            <option value="asc">Perubahan Terendah</option>
+                            <option value="desc">Perubahan Tertinggi</option>
+                        </select>
+                    </th>
+                    <th>
+                        Spread 
+                        <select id="spreadFilter" onchange="sortTable('spread')">
+                            <option value="asc">Spread Terkecil</option>
+                            <option value="desc">Spread Terbesar</option>
+                        </select>
+                    </th>
+                    <th>
+                        Rasio Risk/Reward 
+                        <select id="riskRewardFilter" onchange="sortTable('riskReward')">
+                            <option value="asc">Rasio Terkecil</option>
+                            <option value="desc">Rasio Terbesar</option>
+                        </select>
+                    </th>
+                    <th>
+                        Keuntungan Potensial 
+                        <select id="profitFilter" onchange="sortTable('profit')">
+                            <option value="asc">Keuntungan Terkecil</option>
+                            <option value="desc">Keuntungan Terbesar</option>
+                        </select>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="coinTableBody">
+                <!-- Data koin akan dimasukkan di sini -->
+            </tbody>
+        </table>
     </div>
 
-    <div class="crypto-list" id="crypto-list">
-        <!-- Cryptocurrency data will be populated here -->
-    </div>
-</div>
+    <script>
+        // API URLs
+        const apiUrls = {
+            coingecko: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=idr',
+            binance: 'https://api.binance.com/api/v3/ticker/24hr',
+            kraken: 'https://api.kraken.com/0/public/Ticker?pair=XXBTZUSD'
+        };
 
-<script>
-    const API_COIN_GECKO = 'https://api.coingecko.com/api/v3';
-    const API_COIN_LORE = 'https://api.coinlore.net/api/tickers/';
+        // Fungsi untuk mengambil data dari API dan menampilkannya
+        async function fetchCoinData() {
+            const selectedApi = document.getElementById('apiSelector').value;
+            const apiUrl = apiUrls[selectedApi];
 
-    let coinsData = [];
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
 
-    // Fetch cryptocurrency data from CoinGecko and CoinLore
-    async function fetchCryptoData() {
-        try {
-            // Fetch data from CoinGecko
-            const geckoData = await fetch(`${API_COIN_GECKO}/coins/markets?vs_currency=usd`);
-            const geckoCoins = await geckoData.json();
+                console.log("Data yang diterima:", data);
 
-            // Fetch data from CoinLore
-            const loreData = await fetch(API_COIN_LORE);
-            const loreCoins = await loreData.json();
+                if (selectedApi === 'kraken' && data.result) {
+                    displayCoins([data.result]); 
+                } else if (Array.isArray(data)) {
+                    displayCoins(data); 
+                } else {
+                    console.error('Data tidak valid:', data);
+                    document.getElementById('loading').innerText = 'Data tidak valid.';
+                    return;
+                }
 
-            // Merge CoinLore and CoinGecko data
-            coinsData = loreCoins.data.map(coin => {
-                const geckoCoin = geckoCoins.find(g => g.id === coin.id);
-                const price = geckoCoin ? geckoCoin.current_price : null; // Fallback to null if price is not found
+                // Menampilkan 3 koin rekomendasi
+                displayRecommendations(data);
 
-                return {
-                    id: coin.id,
-                    name: coin.name,
-                    symbol: coin.symbol,
-                    price: price,  // Set price to null if not available
-                    change: coin.percent_change_24h,
-                    volume: coin.volume_24h,
-                    marketCap: coin.market_cap,
-                    rsi: Math.random() * 100,  // Simulating RSI for now
-                };
-            });
-
-            // Apply filtering and recommendations based on stricter scalping criteria
-            const filteredCoins = applyScalpingCriteria(coinsData);
-            renderCryptoList(filteredCoins);
-        } catch (error) {
-            console.error('Error fetching cryptocurrency data:', error);
-        }
-    }
-
-    // Filter coins based on strict scalping criteria (80-90% chance of success)
-    function applyScalpingCriteria(coins) {
-        return coins.filter(coin => {
-            // Only include coins with RSI below 30 (undervalued) or above 70 (overvalued)
-            const isOverbought = coin.rsi > 70;
-            const isOversold = coin.rsi < 30;
-            const changeLimit = Math.abs(coin.change) >= 5; // 5% change required for scalping
-            return (isOverbought || isOversold) && changeLimit;
-        }).sort((a, b) => b.change - a.change); // Sort by 24h price change (descending)
-    }
-
-    // Render cryptocurrency list to the UI
-    function renderCryptoList(data) {
-        const list = document.getElementById('crypto-list');
-        list.innerHTML = '';  // Clear the list before rendering new data
-        data.forEach(coin => {
-            const coinElement = document.createElement('div');
-            coinElement.classList.add('crypto-item');
-            if (coin.change > 5 || coin.change < -5) {
-                coinElement.classList.add('highlight');
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('loading').innerText = 'Terjadi kesalahan saat memuat data.';
             }
-
-            // Check if price is available
-            const priceDisplay = coin.price !== null ? `$${coin.price.toFixed(2)}` : 'Price Unavailable';
-            
-            // Calculate scalping success probability
-            const scalpingProbability = calculateScalpingProbability(coin.rsi, coin.change);
-            
-            coinElement.innerHTML = `
-                <div class="crypto-name">${coin.name} (${coin.symbol})</div>
-                <div class="crypto-price">Price: ${priceDisplay}</div>
-                <div class="crypto-change">Change (24h): ${coin.change}%</div>
-                <div class="crypto-change">Scalping Probability: ${scalpingProbability}%</div>
-                <div class="buy-sell-btn ${coin.rsi > 70 ? 'sell-btn' : 'buy-btn'}" onclick="handleScalping('${coin.symbol}', ${coin.price}, ${coin.rsi})">
-                    ${coin.rsi > 70 ? 'Sell' : 'Buy'}
-                </div>
-            `;
-            list.appendChild(coinElement);
-        });
-    }
-
-    // Calculate scalping probability based on RSI and price change
-    function calculateScalpingProbability(rsi, change) {
-        let probability = 0;
-        if (rsi < 30) {
-            probability = Math.min(100, Math.abs(change) * 1.5); // If RSI is low, higher chance of success
-        } else if (rsi > 70) {
-            probability = Math.min(100, Math.abs(change) * 1.2); // If RSI is high, lower chance of success
         }
-        return probability.toFixed(2);
-    }
 
-    // Handle scalping recommendation logic
-    function handleScalping(symbol, price, rsi) {
-        const targetPrice = rsi > 70 ? price * 0.95 : price * 1.05; // Buy if RSI < 30, Sell if RSI > 70
-        const action = rsi > 70 ? 'Sell' : 'Buy';
-        const timeEstimate = '12-24 hours';
-        
-        // Display the recommendation
-        alert(`Recommendation: ${action} ${symbol}\nTarget Price: $${targetPrice.toFixed(2)}\nTime Estimate: ${timeEstimate}`);
-        sendTelegramNotification(action, symbol, targetPrice, timeEstimate);
-    }
+        // Fungsi untuk menampilkan data koin dalam tabel utama
+        function displayCoins(data) {
+            const tableBody = document.getElementById('coinTableBody');
+            const loading = document.getElementById('loading');
+            loading.style.display = 'none';
+            document.getElementById('coinTable').style.display = 'table';
 
-    // Send scalping recommendation to Telegram
-    async function sendTelegramNotification(action, symbol, targetPrice, timeEstimate) {
-        const botToken = 'YOUR_BOT_TOKEN';
-        const chatId = 'YOUR_CHAT_ID';
-        const message = `Crypto Scalping Recommendation: ${action} ${symbol}\nTarget Price: $${targetPrice.toFixed(2)}\nTime Estimate: ${timeEstimate}`;
+            // Menghapus data lama sebelum memasukkan data baru
+            tableBody.innerHTML = '';
 
-        try {
-            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: message,
-                })
+            // Menambahkan data koin
+            data.forEach(coin => {
+                const priceChange24h = coin.price_change_percentage_24h || 0;
+                const volume24h = coin.total_volume || 0;
+                const spread = coin.current_price * 0.001; // Misalnya spread 0.1% dari harga terkini
+                const volatility = priceChange24h / 100;
+                const targetProfit = volatility * 0.5;
+                const stopLoss = volatility * 0.2;
+                const riskRewardRatio = targetProfit / stopLoss;
+                const modal = 1000;
+                const entryPrice = coin.current_price || 1;
+                const positionSize = modal / entryPrice;
+                const exitPrice = entryPrice + targetProfit;
+                const profitPotential = (exitPrice - entryPrice) * positionSize;
+
+                // Membuat baris baru untuk tabel utama
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="coin-name">${coin.name || coin.symbol}</td>
+                    <td class="price">Rp ${coin.current_price.toLocaleString()}</td>
+                    <td>${volume24h.toLocaleString()}</td>
+                    <td>${priceChange24h.toFixed(2)}%</td>
+                    <td>${spread.toFixed(2)}%</td>
+                    <td>${riskRewardRatio.toFixed(2)}</td>
+                    <td>Rp ${profitPotential.toFixed(2)}</td>
+                `;
+                tableBody.appendChild(row);
             });
-            console.log('Telegram notification sent');
-        } catch (error) {
-            console.error('Error sending Telegram notification:', error);
         }
-    }
 
-    // Initial load
-    fetchCryptoData();
+        // Fungsi untuk menampilkan koin rekomendasi berdasarkan analisis scalping
+        function displayRecommendations(data) {
+            const recommendedCoins = [];
+            
+            data.forEach(coin => {
+                const priceChange24h = coin.price_change_percentage_24h || 0;
+                const volatility = priceChange24h / 100;
+                const targetProfit = volatility * 0.5;
+                const stopLoss = volatility * 0.2;
+                const riskRewardRatio = targetProfit / stopLoss;
+                const modal = 1000;
+                const entryPrice = coin.current_price || 1;
+                const positionSize = modal / entryPrice;
+                const exitPrice = entryPrice + targetProfit;
+                const profitPotential = (exitPrice - entryPrice) * positionSize;
 
-    // Event listeners for filter buttons
-    document.getElementById('top-gainers').addEventListener('click', () => {
-        const topGainers = coinsData.filter(coin => coin.change > 0).slice(0, 10);
-        renderCryptoList(topGainers);
-    });
+                recommendedCoins.push({
+                    name: coin.name || coin.symbol,
+                    price: coin.current_price,
+                    riskRewardRatio: riskRewardRatio,
+                    profitPotential: profitPotential
+                });
+            });
 
-    document.getElementById('top-losers').addEventListener('click', () => {
-        const topLosers = coinsData.filter(coin => coin.change < 0).slice(0, 10);
-        renderCryptoList(topLosers);
-    });
-</script>
+            // Urutkan berdasarkan profit potensial tertinggi
+            recommendedCoins.sort((a, b) => b.profitPotential - a.profitPotential);
+            const topRecommendedCoins = recommendedCoins.slice(0, 3); // Ambil 3 teratas
 
+            const recommendationTableBody = document.getElementById('recommendationTable');
+            recommendationTableBody.innerHTML = ''; // Hapus data lama
+
+            // Tampilkan koin rekomendasi dalam tabel
+            topRecommendedCoins.forEach(coin => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${coin.name}</td>
+                    <td>Rp ${coin.price.toLocaleString()}</td>
+                    <td>${coin.riskRewardRatio.toFixed(2)}</td>
+                    <td>Rp ${coin.profitPotential.toFixed(2)}</td>
+                `;
+                recommendationTableBody.appendChild(row);
+            });
+        }
+
+        // Fungsi untuk mengurutkan tabel berdasarkan filter
+        function sortTable(filterType) {
+            const tableBody = document.getElementById('coinTableBody');
+            const rows = Array.from(tableBody.rows);
+            const selectedFilter = document.querySelector(`#${filterType}Filter`).value;
+
+            // Urutkan berdasarkan filter yang dipilih
+            rows.sort((a, b) => {
+                let aValue, bValue;
+                
+                switch (filterType) {
+                    case 'price':
+                        aValue = parseFloat(a.cells[1].innerText.replace('Rp', '').replace(/\./g, '').trim());
+                        bValue = parseFloat(b.cells[1].innerText.replace('Rp', '').replace(/\./g, '').trim());
+                        break;
+                    case 'volume':
+                        aValue = parseFloat(a.cells[2].innerText.replace(/\./g, '').trim());
+                        bValue = parseFloat(b.cells[2].innerText.replace(/\./g, '').trim());
+                        break;
+                    case 'priceChange':
+                        aValue = parseFloat(a.cells[3].innerText.replace('%', '').trim());
+                        bValue = parseFloat(b.cells[3].innerText.replace('%', '').trim());
+                        break;
+                    case 'spread':
+                        aValue = parseFloat(a.cells[4].innerText.trim());
+                        bValue = parseFloat(b.cells[4].innerText.trim());
+                        break;
+                    case 'riskReward':
+                        aValue = parseFloat(a.cells[5].innerText.trim());
+                        bValue = parseFloat(b.cells[5].innerText.trim());
+                        break;
+                    case 'profit':
+                        aValue = parseFloat(a.cells[6].innerText.replace('Rp', '').replace(/\./g, '').trim());
+                        bValue = parseFloat(b.cells[6].innerText.replace('Rp', '').replace(/\./g, '').trim());
+                        break;
+                    default:
+                        break;
+                }
+
+                // Atur berdasarkan ascending atau descending
+                if (selectedFilter === 'asc') {
+                    return aValue - bValue;
+                } else {
+                    return bValue - aValue;
+                }
+            });
+
+            // Menampilkan baris setelah diurutkan
+            rows.forEach(row => tableBody.appendChild(row));
+        }
+
+        // Inisialisasi halaman
+        window.onload = fetchCoinData;
+    </script>
 </body>
 </html>
